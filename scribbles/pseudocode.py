@@ -31,6 +31,8 @@ print cooccurrences['attitude']
 
 # Finally: Choose the best method / score to evaluate anglicisms in german / english. Are they comparably specific or do they significantly differ in specificity?
 
+# Could be interesting to do variations on the cooccurrence to see wether something changes
+
 #Is the cosinus similarity constant for given vectors if you add nulldimensions?
 #!important for comparing different vector spaces
 # -> ja (siehe cosinetest.py)
