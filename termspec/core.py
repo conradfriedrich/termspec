@@ -69,7 +69,7 @@ def word_word_cooccurrence_matrix(docs):
     Xc = (X.T * X)
 
     # Main diagonal to 0, useless anyway.
-    Xc.setdiag(0)
+    # Xc.setdiag(0)
 
     # The Matrix is filled with zero and transformed to the numpy array format.
     M = np.asarray(Xc.todense())
@@ -95,7 +95,7 @@ def document_word_count_matrix(docs):
     X = count_model.fit_transform(strdocs)
     c_fns = count_model.get_feature_names()
 
-    # The Matrix is filled with zeroes and transformed to the numpy array format.
+    # The Matrix is filled with zeros and transformed to the numpy array format.
     X = np.asarray(X.todense())
 
     return X, c_fns
@@ -113,8 +113,10 @@ def cosine_similarity_matrix(M):
     Y = pdist(M, metric='cosine')
     # make the cosine distance matrix readable
     Y = squareform(Y)
+
     # #take not the cosine distance, but similarity (applied per cell)
     Y = 1 - Y
+
     return Y
 
 def tfidf_matrix(docs):
@@ -178,7 +180,6 @@ def nzdm(M, fns, word):
     """
 
     context_vector = M[c_fns.index(word)]
-    print(context_vector.nonzero()[0])
     n_total_dimensions = len(c_fns)
     n_non_zero_dimensions = len(context_vector.nonzero()[0])
 
@@ -201,21 +202,23 @@ def csm(CM, SM, fns, word):
 
     context_vector = CM[fns.index(word)]
     nonzero_indices = np.flatnonzero(context_vector)
-    context_terms = [fns[i] for i in nonzero_indices]
+    context_terms_names = [fns[i] for i in nonzero_indices]
 
-    util.printprettymatrix(M = SM, rns = fns, cns = fns)
+    # util.printprettymatrix(M = SM, rns = fns, cns = fns)
 
     # The Subset of SM with just the context vector's rows and columns 
     # So that the average can be calculated
-    print(SM.shape)
+
     SSM = SM[:,nonzero_indices][nonzero_indices,:]
     # M[:,[0,2]][[0,2],:]
     # print(SM)
 
-    util.printprettymatrix(M = SSM, rns = context_terms, cns = context_terms)
+    # Calculates the Average Cosine distance of all pairs of terms
+    mask = np.ones(SSM.shape, dtype=bool)
+    np.fill_diagonal(mask, 0)
+    mean = SSM[mask].mean()
 
-    print(np.mean(SSM))
-
+    return mean
 
 # All the computed values that can be evaluated later on
 results = {}
@@ -223,26 +226,43 @@ results = {}
 docs = retrieve_data_and_tokenize()
 
 #####################################################################
-# X, c_fns = document_word_count_matrix(docs)
+
+print('#####################################################################')
+print('measure 1: Document Frequency', 'Higher means less specific')
+X, c_fns = document_word_count_matrix(docs)
 # util.printprettymatrix(M = X, cns = c_fns)
 
-# get_df_for_word(M = X, word = 'foo', fns = c_fns)
-# get_df_for_word(M = X, word = 'baz', fns = c_fns)
-# get_df_for_word(M = X, word = 'bang', fns = c_fns)
-# get_df_for_word(M = X, word = 'return', fns = c_fns)
-#####################################################################
+
+
+sterm = 'plotz'
+print(sterm, 1 - df(M = X, word = sterm, fns = c_fns))
+sterm = 'foo'
+print(sterm, 1 - df(M = X, word = sterm, fns = c_fns))
 
 #####################################################################
+
+print('#####################################################################')
+print('measure 2: Non Zero Dimensions Measure', 'Higher means less specific')
 X, c_fns = word_word_cooccurrence_matrix(docs)
 
-util.printprettymatrix(M = X, rns = c_fns, cns = c_fns)
+sterm = 'plotz'
+print(sterm, 1 - nzdm(M = X, word = sterm, fns = c_fns))
+sterm = 'foo'
+print(sterm, 1 - nzdm(M = X, word = sterm, fns = c_fns))
 
-# print(nzdm(M = X, word = 'frobnic', fns = c_fns))
 
-# Y = cosine_similarity_matrix(X)
+#####################################################################
 
-# csm(CM = X, SM = Y, word='plotz', fns=c_fns)
-# csm(CM = X, SM = Y, word='foo', fns=c_fns)
+print('#####################################################################')
+print('measure 3: Average Cosine Similarity', 'Higher means MORE specific')
+
+Y = cosine_similarity_matrix(X)
+
+sterm = 'plotz'
+print(sterm, csm(CM = X, SM = Y, word=sterm, fns=c_fns))
+sterm = 'foo'
+print(sterm, csm(CM = X, SM = Y, word=sterm, fns=c_fns))
+
 
 
 
