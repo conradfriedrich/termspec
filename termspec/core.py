@@ -34,7 +34,7 @@ def retrieve_data_and_tokenize():
     # docs = (
     #   "There is no single concept of cool. One of the essential characteristics of cool is its mutability — what is considered cool changes over time and varies among cultures and generations.",
     #   "One consistent aspect however, is that  is wildly seen as positive and desirable.",
-    #   "The sum and substance of cool is a self-conscious aplomb in overall behavior, which entails a set of specific behavioral characteristics that is firmly anchored in symbology, a set of discernible bodily movements, postures, facial expressions and voice modulations that are acquired and take on strategic social value within the peer context.",
+    #   "The sum and substance of cool is a self-conscious plomb in overall behavior, which entails a set of specific behavioral characteristics that is firmly anchored in symbology, a set of discernible bodily movements, postures, facial expressions and voice modulations that are acquired and take on strategic social value within the peer context.",
     #   "Cool was once an attitude fostered by rebels and underdogs, such as slaves, prisoners, bikers and political dissidents, etc., for whom open rebellion invited punishment, so it hid defiance behind a wall of ironic detachment, distancing itself from the source of authority rather than directly confronting it."
     #   )
 
@@ -101,14 +101,16 @@ def document_word_count_matrix(docs):
     return X, c_fns
 
 def cosine_similarity_matrix(M):
-    """Calculate the cosine distance for each row in the context matrix with each other.
-    I.e. calculate all cosine distances between each cooccurrence vector.
+    """Computes a SQUARE word-word cosine distance matrix.
 
-    Takes a 2 dimensional ndarray
-    Returns a 2 dimensional ndarray
+    Calculate the cosine distance for each row in the @M with each other.
+    I.e. calculate all cosine distances between each vector.
+
+    Arguments:
+    M -- Matrix of Context Vectors (Or any others)
     """
 
-    Y = pdist(M,metric='cosine')
+    Y = pdist(M, metric='cosine')
     # make the cosine distance matrix readable
     Y = squareform(Y)
     # #take not the cosine distance, but similarity (applied per cell)
@@ -132,7 +134,8 @@ def tfidf_matrix(docs):
     ]
 
     Returns:
-    Matrix, Nltk Model that has been used
+    Matrix of tfidf values,
+    List of feature names
     """
     # Docs have to be rejoined. The TfidfVectorizer only likes strings as document inputs.
     # Then calculates tfidf per term in document
@@ -141,31 +144,78 @@ def tfidf_matrix(docs):
     tfidf_model = TfidfVectorizer()
 
     X = tfidf_model.fit_transform(strdocs)
-    # c_fns = tfidf_model.get_feature_names()
+    c_fns = tfidf_model.get_feature_names()
     # util.printprettymatrix(X.todense(), cns = c_fns)
 
-    return X, tfidf_model
+    return X, c_fns
 
 
 
-def get_df_for_word(X = None, word = None, fns = None):
+def df(M, fns, word):
     """Calculate the df value of a word from a document-word count matrix.
 
     """
     word_index = fns.index(word)
     # Word count over all documents. It's a Matrix (2d ndarray).
-    W = X[:, [word_index]]
+    W = M[:, [word_index]]
 
     # The total number of Documents is just the number of rows of the matrix.
     n_total_documents = W.shape[0]
 
     # The number of documents where the word appears is the length of the array of nonzero elements in that row
-    df = len(W.nonzero()[0])
+    document_frequency = len(W.nonzero()[0])
 
     # Scaled document frequency in relation to the total number of documents
-    sdf =  df / n_total_documents
+    sdf =  document_frequency / n_total_documents
 
     return sdf
+
+def nzdm(M, fns, word):
+    """Calculates the non zero dimensional measure for @word
+
+    Calculates the count of total unique cooccurences for the given word divided by the total of words.
+    The result ist the percentage of the words that @word stands in cooccurence with.
+    """
+
+    context_vector = M[c_fns.index(word)]
+    print(context_vector.nonzero()[0])
+    n_total_dimensions = len(c_fns)
+    n_non_zero_dimensions = len(context_vector.nonzero()[0])
+
+    non_zero_dimensions_measure = n_non_zero_dimensions / n_total_dimensions
+    return non_zero_dimensions_measure
+
+def csm(CM, SM, fns, word):
+    """Calculates the Cosine similarity Measure for @word.
+
+    TODO: This can be SEVERELY optimized by not calculating the complete cosine matrix first.
+    That borders on stupid, really. But no premature optimization until i have a working toy case.
+
+    Arguments:
+    CM -- Cooccurrence Matrix
+    SM -- Similarity Matrix
+    fns -- labels for the matrix
+    word -- word to calculate the measure for.
+    """
+
+
+    context_vector = CM[fns.index(word)]
+    nonzero_indices = np.flatnonzero(context_vector)
+    context_terms = [fns[i] for i in nonzero_indices]
+
+    util.printprettymatrix(M = SM, rns = fns, cns = fns)
+
+    # The Subset of SM with just the context vector's rows and columns 
+    # So that the average can be calculated
+    print(SM.shape)
+    SSM = SM[:,nonzero_indices][nonzero_indices,:]
+    # M[:,[0,2]][[0,2],:]
+    # print(SM)
+
+    util.printprettymatrix(M = SSM, rns = context_terms, cns = context_terms)
+
+    print(np.mean(SSM))
+
 
 # All the computed values that can be evaluated later on
 results = {}
@@ -176,38 +226,23 @@ docs = retrieve_data_and_tokenize()
 # X, c_fns = document_word_count_matrix(docs)
 # util.printprettymatrix(M = X, cns = c_fns)
 
-# get_df_for_word(X = X, word = 'foo', fns = c_fns)
-# get_df_for_word(X = X, word = 'baz', fns = c_fns)
-# get_df_for_word(X = X, word = 'bang', fns = c_fns)
-# get_df_for_word(X = X, word = 'return', fns = c_fns)
+# get_df_for_word(M = X, word = 'foo', fns = c_fns)
+# get_df_for_word(M = X, word = 'baz', fns = c_fns)
+# get_df_for_word(M = X, word = 'bang', fns = c_fns)
+# get_df_for_word(M = X, word = 'return', fns = c_fns)
 #####################################################################
 
+#####################################################################
 X, c_fns = word_word_cooccurrence_matrix(docs)
 
 util.printprettymatrix(M = X, rns = c_fns, cns = c_fns)
 
-sterm = 'foo'
-context_vector = X[c_fns.index(sterm)]
+# print(nzdm(M = X, word = 'frobnic', fns = c_fns))
 
-# X, c_fns = compute_cooccurrence_matrix(docs)
+# Y = cosine_similarity_matrix(X)
 
-
-
-
-# Y= compute_cosine_similarity_matrix(X)
-
-# # find the context for the specificity term with cooccurrence not 0
-# sterm = 'foo'
-# # this is sterm's row of the cooccurence matrix i.e. sterm's context vector
-# c_context_vector = X[c_fns.index(sterm)]
-
-# #remove all zero elements
-# nonzero_indices = np.flatnonzero(c_context_vector)
-
-# #retrieve all context terms that stand in actual cooccurrence with sterm
-# context_terms = [c_fns[i] for i in nonzero_indices]
-
-# util.printprettymatrix(Y, c_fns)
+# csm(CM = X, SM = Y, word='plotz', fns=c_fns)
+# csm(CM = X, SM = Y, word='foo', fns=c_fns)
 
 
 
