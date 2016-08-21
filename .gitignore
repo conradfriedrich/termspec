@@ -1,6 +1,8 @@
 # Byte-compiled / optimized / DLL files
 termspec/__pycache__/
 __pycache__/
+termspec/termspec.tmp
+
 *.py[cod]
 *$py.class
 

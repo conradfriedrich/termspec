@@ -2,12 +2,16 @@
 
 import helpers as util
 import numpy as np
-import json #just for printing!
-from nltk.tokenize import sent_tokenize, word_tokenize
-from scipy.spatial.distance import pdist, squareform
+import pickle
+
+from timer import Timer
+
+from nltk.corpus import brown
+from nltk.tokenize import word_tokenize, sent_tokenize
+from scipy.spatial.distance import pdist, cdist, squareform
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
-def retrieve_data_and_tokenize():
+def retrieve_data_and_tokenize(read_from_file = True):
     """Retrieves the data from the source and makes a neat array of words, sentences and documents out of it.
     [ #docs
         [ #document1
@@ -22,29 +26,68 @@ def retrieve_data_and_tokenize():
 
     """
 
-    # docs = ['foo bar bar. boom bam bum. foo', 'foo baz bar', 'foo foo baz baz', 'foo', 'bar derp']
-
-    docs = [
-        'Optional plotz says to frobnicate the bizbaz first. foo bar bar. foo',
-        'Return a foo bang. foo bar. The Ding Dangel Dong Dong foo bang bar.',
-        'foo bang baz padauts remoreng.',
-        'foo bar bar baz foo'
-    ]
-
-    # docs = (
-    #   "There is no single concept of cool. One of the essential characteristics of cool is its mutability — what is considered cool changes over time and varies among cultures and generations.",
-    #   "One consistent aspect however, is that  is wildly seen as positive and desirable.",
-    #   "The sum and substance of cool is a self-conscious plomb in overall behavior, which entails a set of specific behavioral characteristics that is firmly anchored in symbology, a set of discernible bodily movements, postures, facial expressions and voice modulations that are acquired and take on strategic social value within the peer context.",
-    #   "Cool was once an attitude fostered by rebels and underdogs, such as slaves, prisoners, bikers and political dissidents, etc., for whom open rebellion invited punishment, so it hid defiance behind a wall of ironic detachment, distancing itself from the source of authority rather than directly confronting it."
-    #   )
-
+    # Try to read in a previously processed version of the current Corpus.
+    # Just to speed things up.
+    # If none is found, process it anew!
 
     return_docs = []
-    for doc in docs:
-        sents = sent_tokenize(doc)
-        sents = [word_tokenize(sent) for sent in sents]
-        sents = [util.normalize(sent) for sent in sents]
-        return_docs.append(sents)
+    if read_from_file:
+        try:
+            file = open("termspec.tmp",'rb')
+            return_docs = pickle.load(file)
+            file.close()
+        except:
+            print('File not Found Error while trying to read corpus from drive...')
+            print('Continuing with reading it in again')
+            read_from_file = False
+
+    if not read_from_file:
+        # docs = ['foo bar bar. boom bam bum. foo', 'foo baz bar', 'foo foo baz baz', 'foo', 'bar derp']
+
+        docs = [
+            'Optional plotz says to frobnicate the bizbaz first. foo bar bar. foo',
+            'Return a foo bang. foo bar. The Ding Dangel Dong Dong foo bang bar.',
+            'foo bang baz padauts remoreng.',
+            'foo bar bar baz foo'
+        ]
+
+        # categories = ['news', 'editorial', 'reviews']
+        # categories = ['news']
+        # sentences = brown.sents(fileids = brown.fileids(categories=categories))
+
+        # docs = [brown.sents(fileids = fileid) for fileid in brown.fileids(categories=categories)]
+
+        ####################################
+        # Compute from brown corpus.
+
+        # count = 0
+        # return_docs = []
+        # for doc in docs:
+        #     returndoc = []
+        #     for sent in doc:
+
+        #         sent = util.normalize(sent)
+        #         count += len(sent)
+        #         returndoc.append(sent)
+        #     return_docs.append(returndoc)
+
+        # print(count)
+
+        ###################################
+        # Compute from Sample Sentences.
+
+        return_docs = []
+        for doc in docs:
+            sents = sent_tokenize(doc)
+            sents = [word_tokenize(sent) for sent in sents]
+            sents = [util.normalize(sent) for sent in sents]
+            return_docs.append(sents)
+
+
+        filehandler = open("termspec.tmp","wb")
+        pickle.dump(return_docs,filehandler)
+        filehandler.close()
+
 
     return return_docs
 
@@ -52,6 +95,7 @@ def word_word_cooccurrence_matrix(docs):
     """Computes a SQUARE cooccurrence matrix of all the terms in the corpus.
 
     Cooccurence is counted +1 if terms appear in the same sentence.
+
     """
 
     # Sentences have to be rejoined. The CountVectorizer only likes strings as document inputs.
@@ -63,28 +107,88 @@ def word_word_cooccurrence_matrix(docs):
     # Counts each cooccurrence and returns a document-word matrix.
     X = count_model.fit_transform(strsents)
 
-    # X is now a document-word matrix, but we want a word-word-matrix.
-    # The value i,j of the matrix is the count of the word j in document (i.e. sentence) i.
-    # Xc ist the word-word-matrix computed from Xc by multiplying with its transpose
-    Xc = (X.T * X)
-
-    # Main diagonal to 0, useless anyway.
-    # Xc.setdiag(0)
-
-    # The Matrix is filled with zero and transformed to the numpy array format.
-    M = np.asarray(Xc.todense())
 
     # These are just all the terms for later reference. important!
     # The c indicates that this data structures should be constant: it depends on its ordering, others might use the exact ordering to map term names and values.
     # Python probably has a better data structure for this (tuples)
     c_fns = count_model.get_feature_names()
 
+    # X is now a document-word matrix, but we want a word-word-matrix.
+    # The value i,j of the matrix is the count of the word j in document (i.e. sentence) i.
+    # Xc ist the word-word-matrix computed from Xc by multiplyig with its transpose.
+    Xc = (X.T * X)
+
+    # The Matrix is filled with zero and transformed to the numpy array format.
+    M = np.asarray(Xc.todense())
+
     #TODO: Throw out all-zero vectors!
 
     # How great is just returning two values? Seriously? python ftw
     return M, c_fns
 
-def document_word_count_matrix(docs):
+
+def word_word_dice_coeff_matrix(docs):
+    """Calculates DICE coefficient for cooccurrences.
+
+    dc = 2*(a & b) / (a * b)
+    where a and b are the counts of sentences term_a and term_b appear in, respectively.
+    a & b is the count of sentences term_a and term_b both appear in
+    """
+
+    # Sentences have to be rejoined. The CountVectorizer only likes strings as document inputs.
+    # Then calculates token count per document (in our case each sentence = one document).
+    strsents = util.flatten_documents_to_sentence_strings(docs)
+
+    count_model = CountVectorizer(ngram_range=(1,1))
+
+    # Counts each cooccurrence and returns a document-word matrix.
+    DWCM = count_model.fit_transform(strsents)
+
+
+    # These are just all the terms for later reference. important!
+    # The c indicates that this data structures should be constant: it depends on its ordering, others might use the exact ordering to map term names and values.
+    # Python probably has a better data structure for this (tuples)
+    fns = count_model.get_feature_names()
+
+    # In how many sentences does the word appear?
+    # Yes, this could be written in a one line comprehension. It would not look good, though.
+    word_counts = []
+    # util.printprettymatrix(M = DWCM.todense(), cns = fns)
+    for word_index, word in enumerate(fns):
+
+        W = DWCM[:, word_index]
+
+        word_counts.append(len(W.nonzero()[0]))
+        # print(word, word_counts[word_index])
+
+    word_count = DWCM.shape[1]
+    sent_count = DWCM.shape[0]
+
+    WWDCM = np.zeros(shape=(word_count, word_count))
+    # for each word-word-combination check
+    for w_i in range(word_count):
+        for w_j in range(word_count):
+            # for each sentence check
+            for s_i in range(sent_count):
+                # Add +1 if both words are in sentence.
+                if not w_i == w_j:
+                    if DWCM[s_i, w_i] > 0 and DWCM[s_i, w_j] > 0:
+                        WWDCM[w_i, w_j] += 1
+                else:
+                    WWDCM[w_i, w_j] = 1
+
+    # Calculate the Dice Coefficient for each pair of words
+    for w_i in range(word_count):
+        for w_j in range(word_count):
+            dc = 2 * (WWDCM[w_i, w_j]) / (word_counts[w_i] + word_counts[w_j])
+            WWDCM[w_i, w_j] = dc
+
+    # util.printprettymatrix(M = WWDCM, cns = fns, rns = fns)
+
+    return WWDCM, fns
+
+
+def document_word_frequency_matrix(docs):
     """Computes a document-word occurrence count matrix.
 
     Occurrence is counted +1 if the term appears in the document.
@@ -99,6 +203,7 @@ def document_word_count_matrix(docs):
     X = np.asarray(X.todense())
 
     return X, c_fns
+
 
 def cosine_similarity_matrix(M):
     """Computes a SQUARE word-word cosine distance matrix.
@@ -118,6 +223,7 @@ def cosine_similarity_matrix(M):
     Y = 1 - Y
 
     return Y
+
 
 def tfidf_matrix(docs):
     """Computes a tfidf matrix for the given corpus.
@@ -152,13 +258,13 @@ def tfidf_matrix(docs):
     return X, c_fns
 
 
-
-def df(M, fns, word):
+def dfm(M, fns, word):
     """Calculate the df value of a word from a document-word count matrix.
 
     """
     word_index = fns.index(word)
     # Word count over all documents. It's a Matrix (2d ndarray).
+    # May be super duper slow! reevaluate!
     W = M[:, [word_index]]
 
     # The total number of Documents is just the number of rows of the matrix.
@@ -168,9 +274,10 @@ def df(M, fns, word):
     document_frequency = len(W.nonzero()[0])
 
     # Scaled document frequency in relation to the total number of documents
-    sdf =  document_frequency / n_total_documents
+    rdfm =  document_frequency / n_total_documents
 
-    return sdf
+    return rdfm
+
 
 def nzdm(M, fns, word):
     """Calculates the non zero dimensional measure for @word
@@ -186,83 +293,113 @@ def nzdm(M, fns, word):
     non_zero_dimensions_measure = n_non_zero_dimensions / n_total_dimensions
     return non_zero_dimensions_measure
 
-def csm(CM, SM, fns, word):
-    """Calculates the Cosine similarity Measure for @word.
+
+def tacsm(WWCM, fns, word):
+    """Calculates the Total average Cosine similarity Measure for @word.
 
     TODO: This can be SEVERELY optimized by not calculating the complete cosine matrix first.
     That borders on stupid, really. But no premature optimization until i have a working toy case.
 
     Arguments:
-    CM -- Cooccurrence Matrix
-    SM -- Similarity Matrix
+    WWCM -- Word-Word Cooccurrence Matrix
     fns -- labels for the matrix
     word -- word to calculate the measure for.
     """
 
+    # CSM = cosine_similarity_matrix (WWCM)
 
-    context_vector = CM[fns.index(word)]
+    context_vector = WWCM[fns.index(word)]
     nonzero_indices = np.flatnonzero(context_vector)
-    context_terms_names = [fns[i] for i in nonzero_indices]
+    # context_terms_names = [fns[i] for i in nonzero_indices]
 
     # util.printprettymatrix(M = SM, rns = fns, cns = fns)
 
-    # The Subset of SM with just the context vector's rows and columns 
-    # So that the average can be calculated
+    # The Subset of WWCM with just the context vector's rows and columns
+    # So that the average can be calculated more efficiently.
+    # SWWCM = WWCM[:,nonzero_indices][nonzero_indices,:]
+    SWWCM = WWCM[nonzero_indices,:]
 
-    SSM = SM[:,nonzero_indices][nonzero_indices,:]
+    # Calculate the cosine distance between each row of SWWCM.
+    # Gives a Square nxn Matrix with n = number of rows in SWWCM
+    CSM = cosine_similarity_matrix(SWWCM)
+
     # M[:,[0,2]][[0,2],:]
-    # print(SM)
 
-    # Calculates the Average Cosine distance of all pairs of terms
-    mask = np.ones(SSM.shape, dtype=bool)
+    # Calculates the Average Cosine distance of all pairs of terms.
+    # Does NOT count the main diagonal (distance of each row to itself equals 1).
+    # That's what the masking is for.
+    mask = np.ones(CSM.shape, dtype=bool)
     np.fill_diagonal(mask, 0)
-    mean = SSM[mask].mean()
+    mean = CSM[mask].mean()
 
     return mean
+
+def acsm(WWCM, fns, word):
+    """Calculates the average Cosine similarity of each context term's cooccurrence vector
+    to @word's context vector
+    """
+
+    context_vector = WWCM[fns.index(word)]
+    nonzero_indices = np.flatnonzero(context_vector)
+    SWWCM = WWCM[nonzero_indices,:]
+    # print(SWWCM.shape)
+
+    CSM = cdist(SWWCM, np.array([context_vector]), 'cosine', V=None)
+    # print(CSM)
+
+    return CSM.mean()
+
+
+
 
 # All the computed values that can be evaluated later on
 results = {}
 
-docs = retrieve_data_and_tokenize()
+with Timer() as t:
+    docs = retrieve_data_and_tokenize(read_from_file = False)
+print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
 
-#####################################################################
+sterms = []
+sterms.append(util.normalize(['foo'])[0])
+sterms.append(util.normalize(['plotz'])[0])
 
-print('#####################################################################')
-print('measure 1: Document Frequency', 'Higher means less specific')
-X, c_fns = document_word_count_matrix(docs)
-# util.printprettymatrix(M = X, cns = c_fns)
-
-
-
-sterm = 'plotz'
-print(sterm, 1 - df(M = X, word = sterm, fns = c_fns))
-sterm = 'foo'
-print(sterm, 1 - df(M = X, word = sterm, fns = c_fns))
-
-#####################################################################
+DWFM, c_fns = document_word_frequency_matrix(docs)
+WWCM, c_fns = word_word_cooccurrence_matrix(docs)
+WWDCM, c_fns = word_word_dice_coeff_matrix(docs)
 
 print('#####################################################################')
-print('measure 2: Non Zero Dimensions Measure', 'Higher means less specific')
-X, c_fns = word_word_cooccurrence_matrix(docs)
+print('measure 1: Document Frequency')
 
-sterm = 'plotz'
-print(sterm, 1 - nzdm(M = X, word = sterm, fns = c_fns))
-sterm = 'foo'
-print(sterm, 1 - nzdm(M = X, word = sterm, fns = c_fns))
-
-
-#####################################################################
+print(sterms[0], 1 - dfm(M = DWFM, word = sterms[0], fns = c_fns))
+print(sterms[1], 1 - dfm(M = DWFM, word = sterms[1], fns = c_fns))
 
 print('#####################################################################')
-print('measure 3: Average Cosine Similarity', 'Higher means MORE specific')
+print('measure 2: Non Zero Dimensions Measure')
 
-Y = cosine_similarity_matrix(X)
+print(sterms[0], 1 - nzdm(M = WWCM, word = sterms[0], fns = c_fns))
+print(sterms[1], 1 -nzdm(M = WWCM, word = sterms[1], fns = c_fns))
 
-sterm = 'plotz'
-print(sterm, csm(CM = X, SM = Y, word=sterm, fns=c_fns))
-sterm = 'foo'
-print(sterm, csm(CM = X, SM = Y, word=sterm, fns=c_fns))
+print('#####################################################################')
+print('measure 3: Simple Cooccurrence: Average Cosine Similarity of Context')
 
+print(sterms[0], tacsm(WWCM = WWCM, word=sterms[0], fns=c_fns))
+print(sterms[1], tacsm(WWCM = WWCM, word=sterms[1], fns=c_fns))
 
+print('#####################################################################')
+print('measure 4: Simple Cooccurrence: Average Cosine Similarity of Context with Term')
 
+print(sterms[0], 1 - acsm(WWCM = WWCM, word=sterms[0], fns=c_fns))
+print(sterms[1], 1 - acsm(WWCM = WWCM, word=sterms[1], fns=c_fns))
 
+print('#####################################################################')
+print('measure 5: Simple Cooccurrence: Average Cosine Similarity of Context')
+
+print(sterms[0], tacsm(WWCM = WWDCM, word=sterms[0], fns=c_fns))
+print(sterms[1], tacsm(WWCM = WWDCM, word=sterms[1], fns=c_fns))
+
+print('#####################################################################')
+print('measure 6: Simple Cooccurrence: Average Cosine Similarity of Context with Term')
+
+# Y = cosine_similarity_matrix(X)
+print(sterms[0], 1 - acsm(WWCM = WWDCM, word=sterms[0], fns=c_fns))
+print(sterms[1], 1 - acsm(WWCM = WWDCM, word=sterms[1], fns=c_fns))

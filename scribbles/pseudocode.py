@@ -25,6 +25,10 @@ print cooccurrences['attitude']
 
 # third score: the average cosine similarity of the cooccurrence's contect vectors (acs-index). For each term in the analysans' cooccurences, coined context, determine it's cooccurrences. then, take the cosine similarity between each of thecontext's term's context vector. the average of those similarity should yield somemeasure for the spread of context. See Dunn Index, Rand Index, Huberts gamma coefficient. Dunn Index might be worth to look into for these purposes.
 
+# Acs is pretty slow. Also, it seems to tend to be less clear the larger the corpus gets. isn't that strange? Lets try: Average Distance of Context Vector to Original Term Vector. Advantages: Way fewer Calculations. Like WAY fewer. Also, seems to connect more directly to the original term. Average Distance, or just the distance to the centroid? which is better? Test out!
+
+# Next idea (Very resource intensive: Compare (for alternative clusterings) the similarity density within the clusters to the average similarity of the entire graph (Urghs).
+
 #proposed advantage of acs: the df model is highly dependent on the type on corpus that is used. if a word appears in a corpus some given times and you then add a lot of other documents without the word to it, the document frequence drastically declines. not so with the cosine measure: it is independet of added null-dimensions. problem with the context, as it gets larger and the added documents, although not containing the original word, may change the acs index.
 
 # possibility to test: use HYPERONYMS from wordnet. Hyperonyms are hierarchies of terms, with the more general terms higher up in the hierarchy. Can the score correctly evaluate the lower/higher specificity? Compare predefined examples, calculate average Success rate. Is the third score any more effective than the first?
@@ -36,3 +40,5 @@ print cooccurrences['attitude']
 #Is the cosinus similarity constant for given vectors if you add nulldimensions?
 #!important for comparing different vector spaces
 # -> ja (siehe cosinetest.py)
+
+# Next: Build in steps to serialize the complex matrices to disk.
