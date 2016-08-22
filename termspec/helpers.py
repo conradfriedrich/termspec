@@ -126,9 +126,20 @@ def write_to_file(filename, data):
     filehandler.close()
 
 def read_from_file(filename):
-    """Reads the file at @filename. Does not catch errors by design, i want them kill the script."""
+    """Reads the file at @filename. Does not throw FileNotFoundError """
     data = None
-    file = open(filename,'rb')
-    data = pickle.load(file)
-    file.close()
+
+    try:
+        file = open(filename,'rb')
+        data = pickle.load(file)
+        file.close()
+    except FileNotFoundError as error:
+        print(error)
+        print('Returning empty data...')
+
     return data
+
+
+
+
+
