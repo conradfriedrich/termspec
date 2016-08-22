@@ -11,7 +11,7 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from scipy.spatial.distance import pdist, cdist, squareform
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
-def retrieve_data_and_tokenize(read_from_file = True):
+def retrieve_data_and_tokenize(corpus = 'toy'):
     """Retrieves the data from the source and makes a neat array of words, sentences and documents out of it.
     [ #docs
         [ #document1
@@ -31,18 +31,9 @@ def retrieve_data_and_tokenize(read_from_file = True):
     # If none is found, process it anew!
 
     return_docs = []
-    if read_from_file:
-        try:
-            file = open("termspec.tmp",'rb')
-            return_docs = pickle.load(file)
-            file.close()
-        except:
-            print('File not Found Error while trying to read corpus from drive...')
-            print('Continuing with reading it in again')
-            read_from_file = False
 
-    if not read_from_file:
-        # docs = ['foo bar bar. boom bam bum. foo', 'foo baz bar', 'foo foo baz baz', 'foo', 'bar derp']
+    if (corpus == 'toy'):
+    # docs = ['foo bar bar. boom bam bum. foo', 'foo baz bar', 'foo foo baz baz', 'foo', 'bar derp']
 
         docs = [
             'Optional plotz says to frobnicate the bizbaz first. foo bar bar. foo',
@@ -50,28 +41,6 @@ def retrieve_data_and_tokenize(read_from_file = True):
             'foo bang baz padauts remoreng.',
             'foo bar bar baz foo'
         ]
-
-        # categories = ['news', 'editorial', 'reviews']
-        # categories = ['news']
-        # sentences = brown.sents(fileids = brown.fileids(categories=categories))
-
-        # docs = [brown.sents(fileids = fileid) for fileid in brown.fileids(categories=categories)]
-
-        ####################################
-        # Compute from brown corpus.
-
-        # count = 0
-        # return_docs = []
-        # for doc in docs:
-        #     returndoc = []
-        #     for sent in doc:
-
-        #         sent = util.normalize(sent)
-        #         count += len(sent)
-        #         returndoc.append(sent)
-        #     return_docs.append(returndoc)
-
-        # print(count)
 
         ###################################
         # Compute from Sample Sentences.
@@ -83,11 +52,32 @@ def retrieve_data_and_tokenize(read_from_file = True):
             sents = [util.normalize(sent) for sent in sents]
             return_docs.append(sents)
 
+    elif corpus == 'brown':
 
-        filehandler = open("termspec.tmp","wb")
-        pickle.dump(return_docs,filehandler)
-        filehandler.close()
+        # categories = ['news', 'editorial', 'reviews']
+        categories = ['news']
+        # sentences = brown.sents(fileids = brown.fileids(categories=categories))
 
+        docs = [brown.sents(fileids = fileid) for fileid in brown.fileids(categories=categories)]
+
+        ##################################
+        # Compute from brown corpus.
+
+        count = 0
+        return_docs = []
+        for doc in docs:
+            returndoc = []
+            for sent in doc:
+
+                sent = util.normalize(sent)
+                count += len(sent)
+                returndoc.append(sent)
+            return_docs.append(returndoc)
+
+        print(count)
+
+    else:
+        raise ValueError('Corpus passed is not known.', corpus)
 
     return return_docs
 
@@ -247,7 +237,7 @@ def tfidf_matrix(docs):
     """
     # Docs have to be rejoined. The TfidfVectorizer only likes strings as document inputs.
     # Then calculates tfidf per term in document
-    strdocs = util.flatten_documents_to_strings
+    strdocs = util.flatten_documents_to_strings(docs)
 
     tfidf_model = TfidfVectorizer()
 
@@ -276,7 +266,7 @@ def dfm(M, fns, word):
     # Scaled document frequency in relation to the total number of documents
     rdfm =  document_frequency / n_total_documents
 
-    return rdfm
+    return 1 - rdfm
 
 
 def nzdm(M, fns, word):
@@ -286,19 +276,16 @@ def nzdm(M, fns, word):
     The result ist the percentage of the words that @word stands in cooccurence with.
     """
 
-    context_vector = M[c_fns.index(word)]
-    n_total_dimensions = len(c_fns)
+    context_vector = M[fns.index(word)]
+    n_total_dimensions = len(fns)
     n_non_zero_dimensions = len(context_vector.nonzero()[0])
 
     non_zero_dimensions_measure = n_non_zero_dimensions / n_total_dimensions
-    return non_zero_dimensions_measure
+    return 1 - non_zero_dimensions_measure
 
 
 def tacsm(WWCM, fns, word):
     """Calculates the Total average Cosine similarity Measure for @word.
-
-    TODO: This can be SEVERELY optimized by not calculating the complete cosine matrix first.
-    That borders on stupid, really. But no premature optimization until i have a working toy case.
 
     Arguments:
     WWCM -- Word-Word Cooccurrence Matrix
@@ -306,13 +293,8 @@ def tacsm(WWCM, fns, word):
     word -- word to calculate the measure for.
     """
 
-    # CSM = cosine_similarity_matrix (WWCM)
-
     context_vector = WWCM[fns.index(word)]
     nonzero_indices = np.flatnonzero(context_vector)
-    # context_terms_names = [fns[i] for i in nonzero_indices]
-
-    # util.printprettymatrix(M = SM, rns = fns, cns = fns)
 
     # The Subset of WWCM with just the context vector's rows and columns
     # So that the average can be calculated more efficiently.
@@ -322,8 +304,6 @@ def tacsm(WWCM, fns, word):
     # Calculate the cosine distance between each row of SWWCM.
     # Gives a Square nxn Matrix with n = number of rows in SWWCM
     CSM = cosine_similarity_matrix(SWWCM)
-
-    # M[:,[0,2]][[0,2],:]
 
     # Calculates the Average Cosine distance of all pairs of terms.
     # Does NOT count the main diagonal (distance of each row to itself equals 1).
@@ -346,60 +326,22 @@ def acsm(WWCM, fns, word):
 
     CSM = cdist(SWWCM, np.array([context_vector]), 'cosine', V=None)
     # print(CSM)
-
+    CSM = 1 - CSM
     return CSM.mean()
 
 
 
 
-# All the computed values that can be evaluated later on
-results = {}
 
-with Timer() as t:
-    docs = retrieve_data_and_tokenize(read_from_file = False)
-print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
 
-sterms = []
-sterms.append(util.normalize(['foo'])[0])
-sterms.append(util.normalize(['plotz'])[0])
 
-DWFM, c_fns = document_word_frequency_matrix(docs)
-WWCM, c_fns = word_word_cooccurrence_matrix(docs)
-WWDCM, c_fns = word_word_dice_coeff_matrix(docs)
 
-print('#####################################################################')
-print('measure 1: Document Frequency')
 
-print(sterms[0], 1 - dfm(M = DWFM, word = sterms[0], fns = c_fns))
-print(sterms[1], 1 - dfm(M = DWFM, word = sterms[1], fns = c_fns))
 
-print('#####################################################################')
-print('measure 2: Non Zero Dimensions Measure')
 
-print(sterms[0], 1 - nzdm(M = WWCM, word = sterms[0], fns = c_fns))
-print(sterms[1], 1 -nzdm(M = WWCM, word = sterms[1], fns = c_fns))
 
-print('#####################################################################')
-print('measure 3: Simple Cooccurrence: Average Cosine Similarity of Context')
 
-print(sterms[0], tacsm(WWCM = WWCM, word=sterms[0], fns=c_fns))
-print(sterms[1], tacsm(WWCM = WWCM, word=sterms[1], fns=c_fns))
 
-print('#####################################################################')
-print('measure 4: Simple Cooccurrence: Average Cosine Similarity of Context with Term')
 
-print(sterms[0], 1 - acsm(WWCM = WWCM, word=sterms[0], fns=c_fns))
-print(sterms[1], 1 - acsm(WWCM = WWCM, word=sterms[1], fns=c_fns))
 
-print('#####################################################################')
-print('measure 5: Simple Cooccurrence: Average Cosine Similarity of Context')
 
-print(sterms[0], tacsm(WWCM = WWDCM, word=sterms[0], fns=c_fns))
-print(sterms[1], tacsm(WWCM = WWDCM, word=sterms[1], fns=c_fns))
-
-print('#####################################################################')
-print('measure 6: Simple Cooccurrence: Average Cosine Similarity of Context with Term')
-
-# Y = cosine_similarity_matrix(X)
-print(sterms[0], 1 - acsm(WWCM = WWDCM, word=sterms[0], fns=c_fns))
-print(sterms[1], 1 - acsm(WWCM = WWDCM, word=sterms[1], fns=c_fns))

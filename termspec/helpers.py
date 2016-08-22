@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import string
+import pickle
+import pandas as pd
+
 from nltk.stem import SnowballStemmer
 from nltk.corpus import stopwords as StopWords
+
 from nltk.tokenize import sent_tokenize, word_tokenize
-import pandas as pd
 
 def normalize(words, language = 'english'):
     #  removes stopwords, lowercases, removes non-alphanumerics and stems (snowball)
@@ -40,7 +43,7 @@ def normalize(words, language = 'english'):
 
     return words
 
-def printprettymatrix(M = None, rns = None, cns = None):
+def printprettymatrix(M, rns = None, cns = None):
     """Prints a Matrix with row and columns labels
     Matrix should be dense.
 
@@ -115,3 +118,17 @@ def flatten_documents_to_sentence_strings(docs):
     for doc in docs:
         strsents.extend([' '.join(sent) for sent in doc])
     return strsents
+
+def write_to_file(filename, data):
+    """Writes the file at @filename. Does not catch errors by design, i want them kill the script."""
+    filehandler = open(filename,"wb")
+    pickle.dump(data,filehandler)
+    filehandler.close()
+
+def read_from_file(filename):
+    """Reads the file at @filename. Does not catch errors by design, i want them kill the script."""
+    data = None
+    file = open(filename,'rb')
+    data = pickle.load(file)
+    file.close()
+    return data
