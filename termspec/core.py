@@ -30,15 +30,15 @@ def easy_setup(filename = None, corpus = 'toy', deserialize = True, serialize = 
     if filename and deserialize:
         with Timer() as t:
             data = {}
-            data['docs'] = util.read_from_file(filename + '_docs')
-            data['DWF'] = util.read_from_file(filename + '_DWF')
+            data['docs'] = util.read_from_file(filename + '_docs' + '.tmp')
+            data['DWF'] = util.read_from_file(filename + '_DWF' + '.tmp')
 
             # The large matrizes have been serialized in sparse format.
-            WWC_S = util.read_from_file(filename + '_WWC')
-            WWDICE_S = util.read_from_file(filename + '_WWDICE')
+            WWC_S = util.read_from_file(filename + '_WWC' + '.tmp')
+            WWDICE_S = util.read_from_file(filename + '_WWDICE' + '.tmp')
             data['WWC'] = np.asarray(WWC_S.todense())
             data['WWDICE'] = np.asarray(WWDICE_S.todense())
-            data['fns'] = util.read_from_file(filename + '_fns')
+            data['fns'] = util.read_from_file(filename + '_fns' + '.tmp')
 
         print ('##### Deserialized Data in %4.1fs' % t.secs)
 
@@ -64,16 +64,16 @@ def easy_setup(filename = None, corpus = 'toy', deserialize = True, serialize = 
 
         with Timer() as t:
             if filename and serialize:
-                util.write_to_file(filename + '_docs', data['docs'])
-                util.write_to_file(filename + '_DWF', data['DWF'])
-                util.write_to_file(filename + '_fns', data['fns'])
+                util.write_to_file(filename + '_docs' + '.tmp', data['docs'])
+                util.write_to_file(filename + '_DWF' + '.tmp', data['DWF'])
+                util.write_to_file(filename + '_fns' + '.tmp', data['fns'])
 
                 # Let's save about 99% of disk space.
                 WWC_S = sparse.csr_matrix(data['WWC'])
                 WWDICE_S = sparse.csr_matrix(data['WWDICE'])
 
-                util.write_to_file(filename + '_WWC', WWC_S)
-                util.write_to_file(filename + '_WWDICE', WWDICE_S)
+                util.write_to_file(filename + '_WWC' + '.tmp', WWC_S)
+                util.write_to_file(filename + '_WWDICE' + '.tmp', WWDICE_S)
         print ('##### Serialized Data in %4.1fs' % t.secs)
 
     return data
@@ -421,9 +421,8 @@ def tacds(WWC, fns, word, metric = 'cosine'):
     context_vector = WWC[fns.index(word)]
     nonzero_indices = np.flatnonzero(context_vector)
 
-    # The Subset of WWC with just the context vector's rows and columns
+    # The Subset of WWC with just the context vector's rows
     # So that the average can be calculated more efficiently.
-    # SWWC = WWC[:,nonzero_indices][nonzero_indices,:]
     SWWC = WWC[nonzero_indices,:]
 
     # Calculate the cosine distance between each row of SWWC.
@@ -453,10 +452,26 @@ def acds(WWC, fns, word, metric = 'cosine'):
 
     CSM = cdist(SWWC, np.array([context_vector]), metric)
     # print(CSM)
-    CSM = CSM
     return CSM.mean()
 
+def mdfcs(WWC, fns, word, metric = 'cosine'):
+    """Calculates the Mean Context Distance from the Centroid of the Context."""
 
+    context_vector = WWC[fns.index(word)]
+    nonzero_indices = np.flatnonzero(context_vector)
+
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be calculated more efficiently.
+    SWWC = WWC[nonzero_indices,:]
+
+    # util.printprettymatrix(SWWC, cns = fns)
+    centroid = np.mean(SWWC, axis=0)
+
+    # distance to centroid matrix
+    DTC = cdist(SWWC, np.array([centroid]), metric)
+
+    # Return the mean distance to the centroid
+    return DTC.mean()
 
 
 
