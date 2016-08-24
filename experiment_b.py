@@ -29,6 +29,25 @@ word_pairs = [
     ('food','pastry'),
     ('food','vegetable'),
     ('food','fruit'),
+    ('food','sandwich'),
+    ('food','soup'),
+    ('food','pizza'),
+    ('food','salad'),
+    ('food', 'relish'),
+    ('food', 'olives'),
+    ('food', 'ketchup'),
+    ('food', 'cookie'),
+
+    ('beverage', 'alcohol'),
+    ('beverage', 'cola'),
+
+    ('alcohol','liquor'),
+    ('alcohol','gin'),
+    ('alcohol','rum'),
+    ('alcohol','brandy'),
+    ('alcohol','cognac'),
+    ('alcohol','wine'),
+    ('alcohol','champagne'),
 
     ('vegetable', 'tomato'),
     ('vegetable', 'mushroom'),
@@ -58,7 +77,7 @@ word_pairs = [
     ('intellectual','chemist'),
 
     ('professional','physician'),
-    ('professional','educator'),
+    # ('professional','educator'),
     ('professional','nurse'),
     ('professional','dentist'),
 
@@ -76,14 +95,15 @@ word_pairs = [
     ]
 
 scores = [
+    'occ',
     'dfs',
     'nzds',
-    'sc_c_acds',
-    'sc_e_acds',
-    'sc_e_mdfcs',
-    'dc_c_mdfcs',
-    'dc_c_acds',
-    'dc_e_acds',
+    # 'sc_e_mdfcs',
+    # 'sc_se_vs',
+    # 'dc_se_vs',
+    # 'dc_c_mdfcs'
+    # 'dc_c_mdfcs',
+    # 'dc_c_acds',
     ]
 #####################################################################
 # EXPERIMENT
@@ -102,16 +122,20 @@ for pair in word_pairs:
         if not word in word_scores:
             with Timer() as t:
                 word_scores[word] = {}
+                word_scores[word]['occ'] = DWF[:, fns.index(word)].sum()
                 word_scores[word]['dfs'] = ts.dfs(M = DWF, word = word, fns=fns)
                 word_scores[word]['nzds'] = ts.nzds(M = WWC, word = word, fns = fns)
-                word_scores[word]['sc_c_acds'] = ts.acds(WWC = WWC, word=word, fns=fns, metric = 'cosine')
-                word_scores[word]['sc_e_acds'] = ts.acds(WWC = WWC, word=word, fns=fns, metric = 'euclidean')
-                word_scores[word]['sc_e_mdfcs'] = ts.mdfcs(WWC = WWC, word=word, fns=fns, metric = 'euclidean')
-                word_scores[word]['dc_c_mdfcs'] = ts.mdfcs(WWC = WWDICE, word=word, fns=fns, metric = 'cosine')
-                word_scores[word]['dc_c_acds'] = ts.acds(WWC = WWDICE, word=word, fns=fns, metric = 'cosine')
-                word_scores[word]['dc_e_acds'] = ts.acds(WWC = WWDICE, word=word, fns=fns, metric = 'euclidean')
+                # word_scores[word]['sc_e_mdfcs'] = ts.mdfcs(WWC = WWC, word=word, fns=fns, metric = 'euclidean')
+                # word_scores[word]['sc_se_vs'] = ts.vs(WWC = WWC, word=word, fns=fns)
+                # word_scores[word]['dc_se_vs'] = ts.vs(WWC = WWDICE, word=word, fns=fns)
+                # word_scores[word]['dc_c_mdfcs'] = ts.mdfcs(WWC = WWDICE, word=word, fns=fns, metric = 'cosine')
+                # word_scores[word]['dc_c_mdfcs'] = ts.mdfcs(WWC = WWDICE, word=word, fns=fns, metric = 'cosine')
+                # word_scores[word]['dc_c_acds'] = ts.acds(WWC = WWDICE, word=word, fns=fns, metric = 'cosine')
             print('##### Calculated scores for %s in  %4.1f' % (word, t.secs))
-print(word_scores)
+            print(word_scores[word])
+
+#####################################################################
+# RESULTS
 
 results = np.zeros( (len(word_pairs),len(scores)), dtype=bool)
 
@@ -123,5 +147,6 @@ for i, pair in enumerate(word_pairs):
         # Checks whether the Score reflects that!
         results[i,j] = word_scores[word_a][score] > word_scores[word_b][score]
 
-util.printprettymatrix(M=results, cns = scores, rns = word_pairs)
+
+util.printprettymatrix(M=results, rns = word_pairs, cns = scores)
 

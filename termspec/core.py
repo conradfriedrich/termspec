@@ -334,9 +334,6 @@ def distance_matrix(M, metric = 'cosine'):
     # make the cosine distance matrix readable
     Y = squareform(Y)
 
-    # # #take not the distance, but similarity (applied per cell)
-    # Y = 1 - Y
-
     return Y
 
 
@@ -410,7 +407,7 @@ def nzds(M, fns, word):
 
 
 def tacds(WWC, fns, word, metric = 'cosine'):
-    """Calculates the Total Average Context Similarity Score for @word.
+    """Calculates the Total Average Context Distance Score for @word.
 
     Arguments:
     WWC -- Word-Word Cooccurrence Matrix
@@ -438,7 +435,7 @@ def tacds(WWC, fns, word, metric = 'cosine'):
     return CSM[mask].mean()
 
 def acds(WWC, fns, word, metric = 'cosine'):
-    """Calculates the Average Context Similarity Score of each context term's cooccurrence vector
+    """Calculates the Average Context Distance Score of each context term's cooccurrence vector
     to @word's context vector
 
     """
@@ -463,8 +460,6 @@ def mdfcs(WWC, fns, word, metric = 'cosine'):
     # The Subset of WWC with just the context vector's rows
     # So that the average can be calculated more efficiently.
     SWWC = WWC[nonzero_indices,:]
-
-    # util.printprettymatrix(SWWC, cns = fns)
     centroid = np.mean(SWWC, axis=0)
 
     # distance to centroid matrix
@@ -473,17 +468,25 @@ def mdfcs(WWC, fns, word, metric = 'cosine'):
     # Return the mean distance to the centroid
     return DTC.mean()
 
+## Todo: Compute Variance of Cluster
+def vs(WWC, fns, word):
+    """Calculates the Variance"""
 
+    context_vector = WWC[fns.index(word)]
+    nonzero_indices = np.flatnonzero(context_vector)
 
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be calculated more efficiently.
+    SWWC = WWC[nonzero_indices,:]
+    centroid = np.mean(SWWC, axis=0)
 
+    # Variance of the Columns.
+    V = np.mean(SWWC, axis = 0)
+    # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
+    V[V == 0] = 1
 
+    # distance to centroid matrix
+    DTC = cdist(SWWC, np.array([centroid]), metric = 'seuclidean', V = V)
 
-
-
-
-
-
-
-
-
-
+    # Return the mean distance to the centroid
+    return DTC.mean()
