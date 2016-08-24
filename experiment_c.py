@@ -68,7 +68,7 @@ for pair in word_pairs:
 
 
 # results = np.zeros( (len(word_pairs),len(scores) + 2), dtype=bool)
-results = np.zeros( (len(word_pairs),len(scores)*2))
+results = np.zeros( (len(word_pairs) + 1,len(scores)*2))
 for i, pair in enumerate(word_pairs):
     word_a = util.normalize([pair[0]])[0]
     word_b = util.normalize([pair[1]])[0]
@@ -85,3 +85,4 @@ for score in scores:
 	labels.append(score + ' word_b')
 
 util.printprettymatrix(M=results, cns = labels, rns = word_pairs)
+

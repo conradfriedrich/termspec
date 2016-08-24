@@ -2,7 +2,7 @@
 
 import helpers as util
 import numpy as np
-import pickle
+import math
 
 from timer import Timer
 
@@ -75,7 +75,7 @@ def easy_setup(filename = None, corpus = 'toy', deserialize = True, serialize = 
                 util.write_to_file(filename + '_WWC' + '.tmp', WWC_S)
                 util.write_to_file(filename + '_WWDICE' + '.tmp', WWDICE_S)
         print ('##### Serialized Data in %4.1fs' % t.secs)
-
+        print()
     return data
 
 def retrieve_data_and_tokenize(corpus = 'toy'):
@@ -250,35 +250,27 @@ def word_word_dice_coeff_matrix_numpy(docs):
     where a and b are the counts of sentences term_a and term_b appear in, respectively.
     a & b is the count of sentences term_a and term_b both appear in
     """
-    print('##### ##### Started to calculate NUMPY Dice Coefficient')
 
-    with Timer() as t:
-        # Sentences have to be rejoined. The CountVectorizer only likes strings as document inputs.
-        # Then calculates token count per document (in our case each sentence = one document).
-        strsents = util.flatten_documents_to_sentence_strings(docs)
-        count_model = CountVectorizer(ngram_range=(1,1))
-        # Counts each cooccurrence and returns a document-word matrix.
-        DWCM_S = count_model.fit_transform(strsents)
-        # These are just all the terms for later reference.
-        fns = count_model.get_feature_names()
-    print('##### ##### Got Document Word Cooccurrence Matrix in %4.1fs' % t.secs)
+    # Sentences have to be rejoined. The CountVectorizer only likes strings as document inputs.
+    # Then calculates token count per document (in our case each sentence = one document).
+    strsents = util.flatten_documents_to_sentence_strings(docs)
+    count_model = CountVectorizer(ngram_range=(1,1))
+    # Counts each cooccurrence and returns a document-word matrix.
+    DWCM_S = count_model.fit_transform(strsents)
+    # These are just all the terms for later reference.
+    fns = count_model.get_feature_names()
 
-    with Timer() as t:
-        DWCM_D = np.asarray(DWCM_S.todense())
-        # Set to 1 if term occurs in document (ignore multiple occurrences)
-        DWCM_D[np.nonzero(DWCM_D)] = 1
-    print('##### ##### Set Nonzero values to 1 in %4.1fs' % t.secs)
+    DWCM_D = np.asarray(DWCM_S.todense())
+    # Set to 1 if term occurs in document (ignore multiple occurrences)
+    DWCM_D[np.nonzero(DWCM_D)] = 1
 
     # Converting back and forth between sparse and dense matrizes because:
     # Sparse Matrix Setting is super slow, but dot product fast!
     # Dense Matrix Setting is super fast, but dot product slow!
     # Converting does not seem costly
-    with Timer() as t:
-        DWCM_S = sparse.csr_matrix(DWCM_D)
-        WWDC_S = DWCM_S.T * DWCM_S
-        WWDC = np.asarray(WWDC_S.todense())
-    print('##### ##### Fun with sparse matrizes in %4.1fs' % t.secs)
-
+    DWCM_S = sparse.csr_matrix(DWCM_D)
+    WWDC_S = DWCM_S.T * DWCM_S
+    WWDC = np.asarray(WWDC_S.todense())
 
     # with Timer() as t:
     #     # Word-Word Matrix of counts of shared document occurrences (Cooccurences).
@@ -286,19 +278,15 @@ def word_word_dice_coeff_matrix_numpy(docs):
     #     WWDC = np.dot(DWCM.T, DWCM)
     # print('##### ##### Transposed Matrix in %4.1fs' % t.secs)
 
-    with Timer() as t:
-        # Get the counts of documents each term appears in
-        # Count of Sentences per Term
-        cospt = DWCM_D.sum(0)
-    print('##### ##### Prepared to calculate NUMPY Dice Coefficient in %4.1fs' % t.secs)
+    # Get the counts of documents each term appears in
+    # Count of Sentences per Term
+    cospt = DWCM_D.sum(0)
 
     # Calculate the DICE Coefficient for each word-word pair.
     # WWDC contains the count of documents where both terms cooccure
     # The Array cospt is used normally to get the document count of each i-th term.
     # The Array cospt is transposed to get the document count of each j-th term.
-    with Timer() as t:
-        WWDICE = 2*WWDC / (cospt + cospt[:, np.newaxis])
-    print('##### ##### Calculated NUMPY Dice Coefficient for each Word-Word-Combination in %4.1fs' % t.secs)
+    WWDICE = 2*WWDC / (cospt + cospt[:, np.newaxis])
 
     return WWDICE, fns
 
@@ -375,8 +363,8 @@ def dfs(M, fns, word):
 
     """
     word_index = fns.index(word)
+
     # Word count over all documents. It's a Matrix (2d ndarray).
-    # May be super duper slow! reevaluate!
     W = M[:, [word_index]]
 
     # The total number of Documents is just the number of rows of the matrix.
@@ -416,11 +404,11 @@ def tacds(WWC, fns, word, metric = 'cosine'):
     """
 
     context_vector = WWC[fns.index(word)]
-    nonzero_indices = np.flatnonzero(context_vector)
+    indices = np.flatnonzero(context_vector)
 
     # The Subset of WWC with just the context vector's rows
     # So that the average can be calculated more efficiently.
-    SWWC = WWC[nonzero_indices,:]
+    SWWC = WWC[indices,:]
 
     # Calculate the cosine distance between each row of SWWC.
     # Gives a Square nxn Matrix with n = number of rows in SWWC
@@ -441,10 +429,10 @@ def acds(WWC, fns, word, metric = 'cosine'):
     """
 
     context_vector = WWC[fns.index(word)]
-    nonzero_indices = np.flatnonzero(context_vector)
+    indices = np.flatnonzero(context_vector)
 
     # The Subset of the Cooccurrence Matrix with just the terms that appear in some context.
-    SWWC = WWC[nonzero_indices,:]
+    SWWC = WWC[indices,:]
     # print(SWWC.shape)
 
     CSM = cdist(SWWC, np.array([context_vector]), metric)
@@ -455,11 +443,14 @@ def mdfcs(WWC, fns, word, metric = 'cosine'):
     """Calculates the Mean Context Distance from the Centroid of the Context."""
 
     context_vector = WWC[fns.index(word)]
-    nonzero_indices = np.flatnonzero(context_vector)
+    indices = np.flatnonzero(context_vector)
+    indices = indices[indices != fns.index(word)]
 
     # The Subset of WWC with just the context vector's rows
     # So that the average can be calculated more efficiently.
-    SWWC = WWC[nonzero_indices,:]
+    SWWC = WWC[indices,:]
+
+
     centroid = np.mean(SWWC, axis=0)
 
     # distance to centroid matrix
@@ -468,16 +459,84 @@ def mdfcs(WWC, fns, word, metric = 'cosine'):
     # Return the mean distance to the centroid
     return DTC.mean()
 
-## Todo: Compute Variance of Cluster
-def vs(WWC, fns, word):
-    """Calculates the Variance"""
+def mdfcs_occ(WWC, fns, word, occ = 10, metric = 'cosine'):
+    """Calculates the Mean Context Distance from the Centroid of the Context."""
 
     context_vector = WWC[fns.index(word)]
-    nonzero_indices = np.flatnonzero(context_vector)
+    indices = np.flatnonzero(context_vector)
+    indices = indices[indices != fns.index(word)]
 
     # The Subset of WWC with just the context vector's rows
     # So that the average can be calculated more efficiently.
-    SWWC = WWC[nonzero_indices,:]
+    SWWC = WWC[indices,:]
+
+
+    centroid = np.mean(SWWC, axis=0)
+
+    # distance to centroid matrix
+    DTC = cdist(SWWC, np.array([centroid]), metric)
+
+    # Return the mean distance to the centroid times the logarithm of occurence
+    return DTC.mean() * math.log(occ)
+
+def mdfcs_mc(WWC, fns, word, mc = 50, metric = 'cosine'):
+    """Calculates the Mean Context Distance from the Centroid of the Context.
+
+    Uses only the @mc most significant cooccurrences!
+    """
+
+    context_vector = WWC[fns.index(word)]
+
+    indices = util.mc_indices(context_vector, fns, mc)
+
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be calculated more efficiently.
+    SWWC = WWC[indices,:]
+
+    # SWWC = WWC[np.argsort(context_vector)[::-1],:]
+    centroid = np.mean(SWWC, axis=0)
+
+    # distance to centroid matrix
+    DTC = cdist(SWWC, np.array([centroid]), metric)
+
+    # Return the mean distance to the centroid
+    return DTC.mean()
+
+
+def mdfcs_sca(WWC, fns, word, metric = 'cosine'):
+    """Calculates the Mean Context Distance from the Centroid of the Context."""
+
+    context_vector = WWC[fns.index(word)]
+    indices = np.flatnonzero(context_vector)
+    indices = indices[indices != fns.index(word)]
+
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be calculated more efficiently.
+    SWWC = WWC[indices,:]
+
+    #Scale the Vectors by Significance of Cooccurrence with Focus word!
+    context_vector = context_vector[indices]
+    SCALEDSWWC = SWWC * context_vector[:, np.newaxis]
+
+    centroid = np.mean(SCALEDSWWC, axis=0)
+
+    # distance to centroid matrix
+    DTC = cdist(SCALEDSWWC, np.array([centroid]), metric)
+
+    # Return the mean distance to the centroid
+    return DTC.mean()
+
+## Todo: Compute Variance of Cluster
+def se_mdfcs(WWC, fns, word):
+    """Calculates the Standard Euclidean Distance using Variance"""
+
+    context_vector = WWC[fns.index(word)]
+    indices = np.flatnonzero(context_vector)
+    indices = indices[indices != fns.index(word)]
+
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be calculated more efficiently.
+    SWWC = WWC[indices,:]
     centroid = np.mean(SWWC, axis=0)
 
     # Variance of the Columns.
@@ -487,6 +546,62 @@ def vs(WWC, fns, word):
 
     # distance to centroid matrix
     DTC = cdist(SWWC, np.array([centroid]), metric = 'seuclidean', V = V)
+
+    # Return the mean distance to the centroid
+    return DTC.mean()
+
+def se_mdfcs_mc(WWC, fns, word, mc = 50):
+    """Calculates the Standard Euclidean Distance using Variance"""
+
+    context_vector = WWC[fns.index(word)]
+
+    # If the context vector has more nonzero elements than mc, only take the mc occurrences!
+    indices = util.mc_indices(context_vector, fns, mc)
+
+    #removes the focus terms's own vector from the context
+    indices = indices[indices != fns.index(word)]
+
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be calculated more efficiently.
+    SWWC = WWC[indices,:]
+    centroid = np.mean(SWWC, axis=0)
+
+    # Variance of the Columns.
+    V = np.mean(SWWC, axis = 0)
+    # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
+    V[V == 0] = 1
+
+    # distance to centroid matrix
+    DTC = cdist(SWWC, np.array([centroid]), metric = 'seuclidean', V = V)
+
+    # Return the mean distance to the centroid
+    return DTC.mean()
+
+
+## Todo: Compute Variance of Cluster
+def se_mdfcs_sca(WWC, fns, word):
+    """Calculates the Standard Euclidean Distance using Variance"""
+
+    context_vector = WWC[fns.index(word)]
+    indices = np.flatnonzero(context_vector)
+    indices = indices[indices != fns.index(word)]
+
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be calculated more efficiently.
+    SWWC = WWC[indices,:]
+    context_vector = context_vector[indices]
+    SCALEDSWWC = SWWC * context_vector[:, np.newaxis]
+
+
+    centroid = np.mean(SCALEDSWWC, axis=0)
+
+    # Variance of the Columns.
+    V = np.mean(SCALEDSWWC, axis = 0)
+    # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
+    V[V == 0] = 1
+
+    # distance to centroid matrix
+    DTC = cdist(SCALEDSWWC, np.array([centroid]), metric = 'seuclidean', V = V)
 
     # Return the mean distance to the centroid
     return DTC.mean()

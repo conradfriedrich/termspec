@@ -8,6 +8,8 @@ from nltk.corpus import stopwords as StopWords
 
 from nltk.tokenize import sent_tokenize, word_tokenize
 
+import numpy as np
+
 def normalize(words, language = 'english'):
     #  removes stopwords, lowercases, removes non-alphanumerics and stems (snowball)
     # words: list of strings
@@ -139,6 +141,30 @@ def read_from_file(filename):
 
     return data
 
+def mc_indices(context_vector, fns, mc = 50):
+    """Return the indices of the @mc highest values of context_vector.
+
+    @fns is just for reference. Not really optimized.
+    """
+    # If the context vector has more nonzero elements than mc, only take the mc occurrences!
+    if len(np.flatnonzero(context_vector)) > mc:
+        fns_index_values = []
+        for i, coeff in enumerate(context_vector):
+            fns_index_values.append((fns[i], i, coeff))
+
+        # Remove zero Cooccurrence Coefficient
+        fns_index_values = [fiv for fiv in fns_index_values if not fiv[2] == 0]
+        fns_index_values = sorted(fns_index_values, key=lambda tuple: tuple[2], reverse=True)
+
+        indices = [fiv[1] for fiv in fns_index_values]
+        indices = np.array(indices)
+        indices = indices[:mc]
+
+
+    else:
+        indices = np.flatnonzero(context_vector)
+    
+    return indices
 
 
 

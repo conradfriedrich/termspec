@@ -41,4 +41,8 @@ print cooccurrences['attitude']
 #!important for comparing different vector spaces
 # -> ja (siehe cosinetest.py)
 
-# Next: Build in steps to serialize the complex matrices to disk.
+# Next: Build in steps to serialize the complex matrices to disk. DONE
+
+# Worry: occurrence count of the word highly correlates with average spread of the context. just because there are a lot more words in it! Idea: Limit the context to a set amount of words of most significant context appearences!
+
+# Idea: Scale rows of contexts by cooccurrence measure with the focus term
