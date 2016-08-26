@@ -31,7 +31,7 @@ print cooccurrences['attitude']
 
 #proposed advantage of acs: the df model is highly dependent on the type on corpus that is used. if a word appears in a corpus some given times and you then add a lot of other documents without the word to it, the document frequence drastically declines. not so with the cosine measure: it is independet of added null-dimensions. problem with the context, as it gets larger and the added documents, although not containing the original word, may change the acs index.
 
-# possibility to test: use HYPERONYMS from wordnet. Hyperonyms are hierarchies of terms, with the more general terms higher up in the hierarchy. Can the score correctly evaluate the lower/higher specificity? Compare predefined examples, calculate average Success rate. Is the third score any more effective than the first?
+# possibility to test: use HYPERONYMS from wordnet. Hyperonyms can be structured in hierarchies of words, with the more general terms higher up in the hierarchy. Can the score correctly evaluate the lower/higher specificity? Compare predefined examples, calculate average Success rate. Is the third score any more effective than the first?
 
 # Finally: Choose the best method / score to evaluate anglicisms in german / english. Are they comparably specific or do they significantly differ in specificity?
 
@@ -45,4 +45,9 @@ print cooccurrences['attitude']
 
 # Worry: occurrence count of the word highly correlates with average spread of the context. just because there are a lot more words in it! Idea: Limit the context to a set amount of words of most significant context appearences!
 
-# Idea: Scale rows of contexts by cooccurrence measure with the focus term
+# Idea: Scale rows of contexts by cooccurrence measure with the focus term (doesnt work too well..)
+
+# Show that DF is no independent of irrelevevant additions to the corpus, while my super duper scores are!
+
+
+# TODO: Freq dist bei sentence context einbauen

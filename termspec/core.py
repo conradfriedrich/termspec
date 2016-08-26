@@ -6,6 +6,7 @@ import math
 
 from timer import Timer
 
+from nltk import FreqDist
 from nltk.corpus import brown
 from nltk.tokenize import word_tokenize, sent_tokenize
 from scipy.spatial.distance import pdist, cdist, squareform
@@ -13,7 +14,155 @@ from scipy import sparse
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
-def easy_setup(filename = None, corpus = 'toy', deserialize = True, serialize = True):
+word_pairs = [
+    ('food','beverage'),
+    ('food','dessert'),
+    ('food','bread'),
+    ('food','cheese'),
+    ('food','meat'),
+    ('food','dish'),
+    ('food','butter'),
+    ('food','cake'),
+    ('food','egg'),
+    ('food','candy'),
+    ('food','pastry'),
+    ('food','vegetable'),
+    ('food','fruit'),
+    ('food','sandwich'),
+    ('food','soup'),
+    ('food','pizza'),
+    ('food','salad'),
+    ('food', 'relish'),
+    ('food', 'olives'),
+    ('food', 'ketchup'),
+    ('food', 'cookie'),
+
+    ('beverage', 'alcohol'),
+    # ('beverage', 'cola'),
+
+    ('alcohol','liquor'),
+    ('alcohol','gin'),
+    ('alcohol','rum'),
+    ('alcohol','brandy'),
+    ('alcohol','cognac'),
+    ('alcohol','wine'),
+    ('alcohol','champagne'),
+
+    ('meat', 'liver'),
+    ('meat', 'ham'),
+
+    ('dish', 'sandwich'),
+    ('dish','soup'),
+    ('dish','pizza'),
+    ('dish','salad'),
+
+    ('vegetable', 'tomato'),
+    ('vegetable', 'mushroom'),
+    ('vegetable', 'legume'),
+
+    ('fruit', 'pineapple'),
+    ('fruit', 'apple'),
+    ('fruit', 'peaches'),
+    ('fruit', 'strawberry'),
+
+    ('vehicle','truck'),
+    ('vehicle','car'),
+    ('vehicle','trailer'),
+    ('vehicle','campers'),
+
+    ('car', 'jeep'),
+    ('car','cab'),
+    ('car','coupe'),
+
+    ('person','worker'),
+    ('person','writer'),
+    ('person','intellectual'),
+    ('person','professional'),
+    ('person','leader'),
+    ('person','entertainer'),
+    ('person','engineer'),
+
+    ('worker','editor'),
+    ('worker','technician'),
+    ('writer','journalist'),
+    ('writer','commentator'),
+    ('writer','novelist'),
+
+    ('intellectual','physicist'),
+    ('intellectual','historian'),
+    ('intellectual','chemist'),
+
+    ('professional','physician'),
+    # ('professional','educator'),
+    ('professional','nurse'),
+    ('professional','dentist'),
+
+    ('entity','organism'),
+    ('entity','object'),
+
+    ('animal', 'mammal'),
+    ('animal', 'bird'),
+    ('animal','dog'),
+    ('animal','cat'),
+    ('animal','horse'),
+    ('animal','chicken'),
+    ('animal','duck'),
+    ('animal','fish'),
+    ('animal','turtle'),
+    ('animal','snake'),
+
+    ('mammal','cattle'),
+    ('mammal','dog'),
+    ('mammal','cat'),
+    ('mammal','horse'),
+
+    ('bird', 'chicken'),
+    ('bird', 'duck'),
+
+    ('fish', 'herring'),
+    ('fish', 'salmon'),
+    ('fish', 'trout'),
+
+    ('metal', 'alloy'),
+    ('metal', 'steel'),
+    ('metal', 'gold'),
+    ('metal', 'silver'),
+    ('metal', 'iron'),
+
+    ('location', 'region'),
+    ('location', 'country'),
+    ('location', 'state'),
+    ('location', 'city'),
+
+    ('substance', 'food'),
+    ('substance', 'metal'),
+    ('substance', 'carcinogen'),
+    ('substance', 'fluid'),
+    ('fluid', 'water'),
+    ('commodity', 'clothing'),
+    ('commodity', 'appliance'),
+    ('artifact', 'covering'),
+    ('artifact', 'paint'),
+    ('artifact', 'roof'),
+    ('artifact', 'curtain'),
+    ('publication', 'book'),
+    ('publication', 'article'),
+    ('artifact', 'decoration'),
+    ('artifact', 'drug'),
+    ('fabric', 'nylon'),
+    ('fabric', 'wool'),
+    ('fabric', 'cotton'),
+    ('facility', 'airport'),
+    ('facility', 'headquarters'),
+    ('facility', 'station'),
+    ('structure', 'house'),
+    ('structure', 'factory'),
+    ('structure', 'store'),
+    ('organ', 'heart'),
+    ('organ', 'lung')
+    ]
+
+def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = True, serialize = True):
     """Sets up data data object for experiments.
 
     If a filename is given, tries to deserialize from that file.
@@ -45,7 +194,33 @@ def easy_setup(filename = None, corpus = 'toy', deserialize = True, serialize = 
     if not data:
         data = {}
         with Timer() as t:
-            data['docs'] = retrieve_data_and_tokenize(corpus = corpus)
+            docs = retrieve_data_and_tokenize(corpus = corpus)
+            tokens = []
+            for doc in docs:
+                for sent in doc:
+                    tokens.extend(sent)
+
+            print('tokens in corpus', len(tokens))
+            words = util.frequency_threshold(tokens, fqt = 10)
+
+            print('words', len(words))
+            words = set(words)
+
+            # Put the
+            data['docs'] = []
+            count = 0
+            for doc in docs:
+                return_doc = []
+                for sent in doc:
+                    return_sent = [token for token in sent if token in words]
+                    # Append if not empty.
+                    if return_sent:
+                        return_doc.append(return_sent)
+                        count += len(return_sent)
+                if return_doc:
+                    data['docs'].append(return_doc)
+            print ('tokens after reducing', count)
+
         print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
 
         with Timer() as t:
@@ -61,7 +236,7 @@ def easy_setup(filename = None, corpus = 'toy', deserialize = True, serialize = 
         print('##### Created Word Word Dice Coefficient Matrix in %4.1fs' % t.secs)
 
         data ['fns'] = fns
-
+        print('Feature Names (Words): ', len(fns))
         with Timer() as t:
             if filename and serialize:
                 util.write_to_file(filename + '_docs' + '.tmp', data['docs'])
@@ -78,7 +253,10 @@ def easy_setup(filename = None, corpus = 'toy', deserialize = True, serialize = 
         print()
     return data
 
-def retrieve_data_and_tokenize(corpus = 'toy'):
+def easy_setup_context_window(filename = None, corpus = 'toy', deserialize = True, serialize = True):
+    return 0
+
+def retrieve_data_and_tokenize(corpus = 'toy', tokenize_sentences = True):
     """Retrieves the data from the source and makes a neat array of words, sentences and documents out of it.
     [ #docs
         [ #document1
@@ -113,11 +291,17 @@ def retrieve_data_and_tokenize(corpus = 'toy'):
         # Compute from Sample Sentences.
 
         return_docs = []
-        for doc in docs:
-            sents = sent_tokenize(doc)
-            sents = [word_tokenize(sent) for sent in sents]
-            sents = [util.normalize(sent) for sent in sents]
-            return_docs.append(sents)
+        if tokenize_sentences:
+            for doc in docs:
+                sents = sent_tokenize(doc)
+                sents = [word_tokenize(sent) for sent in sents]
+                sents = [util.normalize(sent) for sent in sents]
+                return_docs.append(sents)
+        else:
+            for doc in docs:
+                words = word_tokenize(doc)
+                words = util.normalize(words)
+                return_docs.append(words)
 
     elif corpus == 'brown':
 
@@ -134,6 +318,8 @@ def retrieve_data_and_tokenize(corpus = 'toy'):
 
         count = 0
         return_docs = []
+
+
         for doc in docs:
             returndoc = []
             for sent in doc:
@@ -439,7 +625,7 @@ def acds(WWC, fns, word, metric = 'cosine'):
     # print(CSM)
     return CSM.mean()
 
-def mdfcs(WWC, fns, word, metric = 'cosine'):
+def mdcs(WWC, fns, word, metric = 'cosine'):
     """Calculates the Mean Context Distance from the Centroid of the Context."""
 
     context_vector = WWC[fns.index(word)]
@@ -459,7 +645,7 @@ def mdfcs(WWC, fns, word, metric = 'cosine'):
     # Return the mean distance to the centroid
     return DTC.mean()
 
-def mdfcs_occ(WWC, fns, word, occ = 10, metric = 'cosine'):
+def mdcs_occ(WWC, fns, word, occ = 10, metric = 'cosine'):
     """Calculates the Mean Context Distance from the Centroid of the Context."""
 
     context_vector = WWC[fns.index(word)]
@@ -476,34 +662,45 @@ def mdfcs_occ(WWC, fns, word, occ = 10, metric = 'cosine'):
     # distance to centroid matrix
     DTC = cdist(SWWC, np.array([centroid]), metric)
 
-    # Return the mean distance to the centroid times the logarithm of occurence
+    # Return the mean distance to the centroid times the logarithm of occurrence
     return DTC.mean() * math.log(occ)
 
-def mdfcs_mc(WWC, fns, word, mc = 50, metric = 'cosine'):
+def mdcs_mc(WWC, fns, word, mc = 50, metric = 'cosine'):
     """Calculates the Mean Context Distance from the Centroid of the Context.
 
-    Uses only the @mc most significant cooccurrences!
+    Uses only the @mc most significant co-occurrences!
     """
 
     context_vector = WWC[fns.index(word)]
 
+    WHOLESUBSETWWC = WWC[np.flatnonzero(context_vector),:]
+
+    # To Account for removal of focus word context vector
     indices = util.mc_indices(context_vector, fns, mc)
+    indices = indices[indices != fns.index(word)]
 
     # The Subset of WWC with just the context vector's rows
     # So that the average can be calculated more efficiently.
+
+    rns = [fns[i] for i in indices]
+    # print(rns)
+    # print()
     SWWC = WWC[indices,:]
 
+    # util.printprettymatrix(SWWC, cns = fns, rns = rns)
+    # print()
     # SWWC = WWC[np.argsort(context_vector)[::-1],:]
-    centroid = np.mean(SWWC, axis=0)
+    centroid = np.mean(WHOLESUBSETWWC, axis=0)
 
     # distance to centroid matrix
     DTC = cdist(SWWC, np.array([centroid]), metric)
+    # util.printprettymatrix(DTC, rns = rns)
 
     # Return the mean distance to the centroid
     return DTC.mean()
 
 
-def mdfcs_sca(WWC, fns, word, metric = 'cosine'):
+def mdcs_sca(WWC, fns, word, metric = 'cosine'):
     """Calculates the Mean Context Distance from the Centroid of the Context."""
 
     context_vector = WWC[fns.index(word)]
@@ -527,7 +724,7 @@ def mdfcs_sca(WWC, fns, word, metric = 'cosine'):
     return DTC.mean()
 
 ## Todo: Compute Variance of Cluster
-def se_mdfcs(WWC, fns, word):
+def se_mdcs(WWC, fns, word):
     """Calculates the Standard Euclidean Distance using Variance"""
 
     context_vector = WWC[fns.index(word)]
@@ -543,6 +740,7 @@ def se_mdfcs(WWC, fns, word):
     V = np.mean(SWWC, axis = 0)
     # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
     V[V == 0] = 1
+    print(V)
 
     # distance to centroid matrix
     DTC = cdist(SWWC, np.array([centroid]), metric = 'seuclidean', V = V)
@@ -550,7 +748,7 @@ def se_mdfcs(WWC, fns, word):
     # Return the mean distance to the centroid
     return DTC.mean()
 
-def se_mdfcs_mc(WWC, fns, word, mc = 50):
+def se_mdcs_mc(WWC, fns, word, mc = 50):
     """Calculates the Standard Euclidean Distance using Variance"""
 
     context_vector = WWC[fns.index(word)]
@@ -579,7 +777,7 @@ def se_mdfcs_mc(WWC, fns, word, mc = 50):
 
 
 ## Todo: Compute Variance of Cluster
-def se_mdfcs_sca(WWC, fns, word):
+def se_mdcs_sca(WWC, fns, word):
     """Calculates the Standard Euclidean Distance using Variance"""
 
     context_vector = WWC[fns.index(word)]

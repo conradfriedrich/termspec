@@ -3,6 +3,7 @@ import string
 import pickle
 import pandas as pd
 
+from nltk import FreqDist
 from nltk.stem import SnowballStemmer
 from nltk.corpus import stopwords as StopWords
 
@@ -41,7 +42,17 @@ def normalize(words, language = 'english'):
     words = [w for w in words if not w in stopwords]
 
     #remove short words
-    words = [w for w in words if not len(w) < 2]
+    words = [w for w in words if not len(w) < 3]
+
+    return words
+
+def frequency_threshold(tokens, fqt = 10):
+    """Return only those WORDS (i.e. unique wordforms) that appear more frequent than @fqt"""
+
+    fq = FreqDist(tokens)
+    fqt = fqt - 1
+    words = list( filter( lambda x: x[1] > fqt, fq.items() ) )
+    words = [item[0] for item in words]
 
     return words
 

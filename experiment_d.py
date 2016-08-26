@@ -5,6 +5,7 @@ import sys
 sys.path.append("termspec/")
 
 import helpers as util
+import math
 
 from termspec import core as ts
 import numpy as np
@@ -37,17 +38,24 @@ word_pairs = [
 
 scores = [
     'dfs',
-    'dc_c_vs_mc'
+    'dc_c_mdfcs_mc'
     ]
 
 for pair in word_pairs:
+    print('coc', pair[0], len(WWC[fns.index(pair[0])].nonzero()[0]))
+    print('coc', pair[1], len(WWC[fns.index(pair[1])].nonzero()[0]))
+    mini = min([
+            len(WWC[fns.index(pair[0])].nonzero()[0]),
+            len(WWC[fns.index(pair[1])].nonzero()[0])
+        ])
+    print('minimal occ', mini)
     for word in pair:
         word = util.normalize([word])[0]
         if not word in word_scores:
             with Timer() as t:
                 word_scores[word] = {}
                 word_scores[word]['dfs'] = ts.dfs(M = DWF, word = word, fns=fns)
-                word_scores[word]['dc_c_vs_mc'] = ts.mdfcs(WWC = WWDICE, word=word, fns=fns)
+                word_scores[word]['dc_c_mdfcs_mc'] = ts.mdfcs_mc(WWC = WWDICE, mc = mini, word = word, fns = fns, metric = 'cosine')
 
             print('##### Calculated scores for %s in  %4.1f' % (word, t.secs))
             print(word_scores[word])

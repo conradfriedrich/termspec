@@ -13,115 +13,37 @@ from timer import Timer
 # SETUP
 
 filename = 'experiment_b_data'
-data = ts.easy_setup(filename = filename, corpus = 'brown', deserialize = True, serialize = True)
+data = ts.easy_setup_sentence_context(filename = filename, corpus = 'brown', deserialize = True, serialize = True)
 
-word_pairs = [
-    ('food','beverage'),
-    ('food','dessert'),
-    ('food','bread'),
-    ('food','cheese'),
-    ('food','meat'),
-    ('food','dish'),
-    ('food','butter'),
-    ('food','cake'),
-    ('food','egg'),
-    ('food','candy'),
-    ('food','pastry'),
-    ('food','vegetable'),
-    ('food','fruit'),
-    ('food','sandwich'),
-    ('food','soup'),
-    ('food','pizza'),
-    ('food','salad'),
-    ('food', 'relish'),
-    ('food', 'olives'),
-    ('food', 'ketchup'),
-    ('food', 'cookie'),
-
-    ('beverage', 'alcohol'),
-    ('beverage', 'cola'),
-
-    ('alcohol','liquor'),
-    ('alcohol','gin'),
-    ('alcohol','rum'),
-    ('alcohol','brandy'),
-    ('alcohol','cognac'),
-    ('alcohol','wine'),
-    ('alcohol','champagne'),
-
-    ('vegetable', 'tomato'),
-    ('vegetable', 'mushroom'),
-    ('vegetable', 'legume'),
-
-    ('vehicle','truck'),
-    ('vehicle','car'),
-    ('vehicle','trailer'),
-    ('vehicle','campers'),
-
-    ('person','worker'),
-    ('person','writer'),
-    ('person','intellectual'),
-    ('person','professional'),
-    ('person','leader'),
-    ('person','entertainer'),
-    ('person','engineer'),
-
-    ('worker','editor'),
-    ('worker','technician'),
-    ('writer','journalist'),
-    ('writer','commentator'),
-    ('writer','novelist'),
-
-    ('intellectual','physicist'),
-    ('intellectual','historian'),
-    ('intellectual','chemist'),
-
-    ('professional','physician'),
-    # ('professional','educator'),
-    ('professional','nurse'),
-    ('professional','dentist'),
-
-    ('entity','organism'),
-    ('entity','object'),
-
-    ('animal','dog'),
-    ('animal','cat'),
-    ('animal','horse'),
-    ('animal','chicken'),
-    ('animal','duck'),
-    ('animal','fish'),
-    ('animal','turtle'),
-    ('animal','snake')
-    ]
 
 scores = [
     'occ',
     'dfs',
     'nzds',
 
-    # 'sc_c_mdfcs',
-    # 'sc_e_mdfcs',
-    # 'sc_se_mdfcs',
+    # 'sc_c_mdcs',
+    # 'sc_e_mdcs',
+    # 'sc_se_mdcs',
 
-    # 'sc_c_mdfcs_mc',
-    # 'sc_e_mdfcs_mc',
-    # 'sc_se_mdfcs_mc',
+    # 'sc_c_mdcs_mc',
+    # 'sc_e_mdcs_mc',
+    # 'sc_se_mdcs_mc',
 
-    # 'sc_c_mdfcs_sca',
-    # 'sc_e_mdfcs_sca',
-    # 'sc_se_mdfcs_sca',
+    # 'sc_c_mdcs_sca',
+    # 'sc_e_mdcs_sca',
+    # 'sc_se_mdcs_sca',
 
-    # 'dc_c_mdfcs',
-    # 'dc_e_mdfcs',
-    'dc_se_mdfcs',
+    # 'dc_c_mdcs',
+    # 'dc_e_mdcs',
+    # 'dc_se_mdcs',
 
-    # 'dc_c_mdfcs_mc',
-    # 'dc_e_mdfcs_mc',
-    # 'dc_se_mdfcs_mc',
+    # 'dc_c_mdcs_mc',
+    # 'dc_e_mdcs_mc',
+    # 'dc_se_mdcs_mc',
 
-    # 'dc_c_mdfcs_sca',
-    # 'dc_e_mdfcs_sca',
-    # 'dc_se_mdfcs_sca',
+    # 'dc_c_mdcs_sca',
+    # 'dc_e_mdcs_sca',
+    # 'dc_se_mdcs_sca',
     ]
 #####################################################################
 # EXPERIMENT
@@ -131,6 +53,17 @@ DWF = data ['DWF']
 WWC = data ['WWC']
 WWDICE = data ['WWDICE']
 fns = data['fns']
+
+# reduce word pairs to ones actually appearing in the reduced corpus
+word_pairs = []
+for pair in ts.word_pairs:
+    pair_in_words = True
+    for word in pair:
+        word = util.normalize([word])[0]
+        if word not in fns:
+            pair_in_words = False
+    if pair_in_words:
+        word_pairs.append(pair)
 
 # For each wordpair, calculate ALL the scores!
 word_scores = {}
@@ -147,32 +80,32 @@ for pair in word_pairs:
                 word_scores[word]['dfs'] = ts.dfs(M = DWF, word = word, fns=fns)
                 word_scores[word]['nzds'] = ts.nzds(M = WWC, word = word, fns = fns)
 
-                # word_scores[word]['sc_c_mdfcs'] = ts.mdfcs(WWC = WWC, word = word, fns = fns, metric = 'cosine')
-                # word_scores[word]['sc_e_mdfcs'] = ts.mdfcs(WWC = WWC, word = word, fns = fns, metric = 'euclidean')
-                # word_scores[word]['sc_se_mdfcs'] = ts.se_mdfcs(WWC = WWC, word = word, fns = fns)
+                # word_scores[word]['sc_c_mdcs'] = ts.mdcs(WWC = WWC, word = word, fns = fns, metric = 'cosine')
+                # word_scores[word]['sc_e_mdcs'] = ts.mdcs(WWC = WWC, word = word, fns = fns, metric = 'euclidean')
+                # word_scores[word]['sc_se_mdcs'] = ts.se_mdcs(WWC = WWC, word = word, fns = fns)
 
-                # word_scores[word]['sc_c_mdfcs_mc'] = ts.mdfcs_mc(WWC = WWC, mc = 200, word = word, fns = fns, metric = 'cosine')
-                # word_scores[word]['sc_e_mdfcs_mc'] = ts.mdfcs_mc(WWC = WWC, mc = 200, word = word, fns = fns, metric = 'euclidean')
-                # word_scores[word]['sc_se_mdfcs_mc'] = ts.se_mdfcs_mc(WWC = WWC, mc = 200, word = word, fns = fns)
+                # word_scores[word]['sc_c_mdcs_mc'] = ts.mdcs_mc(WWC = WWC, mc = 200, word = word, fns = fns, metric = 'cosine')
+                # word_scores[word]['sc_e_mdcs_mc'] = ts.mdcs_mc(WWC = WWC, mc = 200, word = word, fns = fns, metric = 'euclidean')
+                # word_scores[word]['sc_se_mdcs_mc'] = ts.se_mdcs_mc(WWC = WWC, mc = 200, word = word, fns = fns)
 
-                # word_scores[word]['sc_c_mdfcs_sca'] = ts.mdfcs_sca(WWC = WWC, word = word, fns = fns, metric = 'cosine')
-                # word_scores[word]['sc_e_mdfcs_sca'] = ts.mdfcs_sca(WWC = WWC, word = word, fns = fns, metric = 'euclidean')
-                # word_scores[word]['sc_se_mdfcs_sca'] = ts.se_mdfcs_sca(WWC = WWC, word = word, fns = fns)
+                # word_scores[word]['sc_c_mdcs_sca'] = ts.mdcs_sca(WWC = WWC, word = word, fns = fns, metric = 'cosine')
+                # word_scores[word]['sc_e_mdcs_sca'] = ts.mdcs_sca(WWC = WWC, word = word, fns = fns, metric = 'euclidean')
+                # word_scores[word]['sc_se_mdcs_sca'] = ts.se_mdcs_sca(WWC = WWC, word = word, fns = fns)
 
-                # word_scores[word]['dc_c_mdfcs'] = ts.mdfcs(WWC = WWDICE, word = word, fns = fns, metric = 'cosine')
-                # word_scores[word]['dc_e_mdfcs'] = ts.mdfcs(WWC = WWDICE, word = word, fns = fns, metric = 'euclidean')
-                word_scores[word]['dc_se_mdfcs'] = ts.se_mdfcs(WWC = WWDICE, word = word, fns = fns)
+                # word_scores[word]['dc_c_mdcs'] = ts.mdcs(WWC = WWDICE, word = word, fns = fns, metric = 'cosine')
+                # word_scores[word]['dc_e_mdcs'] = ts.mdcs(WWC = WWDICE, word = word, fns = fns, metric = 'euclidean')
+                # word_scores[word]['dc_se_mdcs'] = ts.se_mdcs(WWC = WWDICE, word = word, fns = fns)
 
-                # word_scores[word]['dc_c_mdfcs_mc'] = ts.mdfcs_mc(WWC = WWDICE, mc = 200, word = word, fns = fns, metric = 'cosine')
-                # word_scores[word]['dc_e_mdfcs_mc'] = ts.mdfcs_mc(WWC = WWDICE, mc = 200, word = word, fns = fns, metric = 'euclidean')
-                # word_scores[word]['dc_se_mdfcs_mc'] = ts.se_mdfcs_mc(WWC = WWDICE, mc = 200, word = word, fns = fns)
+                # word_scores[word]['dc_c_mdcs_mc'] = ts.mdcs_mc(WWC = WWDICE, mc = 50, word = word, fns = fns, metric = 'cosine')
+                # word_scores[word]['dc_e_mdcs_mc'] = ts.mdcs_mc(WWC = WWDICE, mc = 200, word = word, fns = fns, metric = 'euclidean')
+                # word_scores[word]['dc_se_mdcs_mc'] = ts.se_mdcs_mc(WWC = WWDICE, mc = 200, word = word, fns = fns)
 
-                # word_scores[word]['dc_c_mdfcs_sca'] = ts.mdfcs_sca(WWC = WWDICE, word = word, fns = fns, metric = 'cosine')
-                # word_scores[word]['dc_e_mdfcs_sca'] = ts.mdfcs_sca(WWC = WWDICE, word = word, fns = fns, metric = 'euclidean')
-                # word_scores[word]['dc_se_mdfcs_sca'] = ts.se_mdfcs_sca(WWC = WWDICE, word = word, fns = fns)
+                # word_scores[word]['dc_c_mdcs_sca'] = ts.mdcs_sca(WWC = WWDICE, word = word, fns = fns, metric = 'cosine')
+                # word_scores[word]['dc_e_mdcs_sca'] = ts.mdcs_sca(WWC = WWDICE, word = word, fns = fns, metric = 'euclidean')
+                # word_scores[word]['dc_se_mdcs_sca'] = ts.se_mdcs_sca(WWC = WWDICE, word = word, fns = fns)
 
-            print('##### Calculated scores for %s in  %4.1f' % (word, t.secs))
-            print(word_scores[word])
+            # print('##### Calculated scores for %s in  %4.1f' % (word, t.secs))
+            # print(word_scores[word])
 
 #####################################################################
 # RESULTS
