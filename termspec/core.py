@@ -6,9 +6,9 @@ import math
 
 from timer import Timer
 
-from nltk import FreqDist
 from nltk.corpus import brown
-from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk import word_tokenize, sent_tokenize, collocations
+
 from scipy.spatial.distance import pdist, cdist, squareform
 from scipy import sparse
 
@@ -163,7 +163,7 @@ word_pairs = [
     ]
 
 def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = True, serialize = True):
-    """Sets up data data object for experiments.
+    """Sets up data object for experiments with the WORD CONTEXT = SENTENCES
 
     If a filename is given, tries to deserialize from that file.
     Creates documents from the given corpus,
@@ -191,10 +191,13 @@ def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = T
 
         print ('##### Deserialized Data in %4.1fs' % t.secs)
 
-    if not data:
+    # If any one of these fails, recompute all.
+    if not (data and data['docs'] and data['DWF'] and data['WWC'] and data['WWDICE'] and data['fns']):
         data = {}
         with Timer() as t:
-            docs = retrieve_data_and_tokenize(corpus = corpus)
+            docs = retrieve_data_and_tokenize_sentences(corpus = corpus)
+
+            # Put the tokens all in one large array to throw out low frequency words
             tokens = []
             for doc in docs:
                 for sent in doc:
@@ -206,7 +209,7 @@ def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = T
             print('words', len(words))
             words = set(words)
 
-            # Put the
+            # Restructure tokens as documents. Quite costly.
             data['docs'] = []
             count = 0
             for doc in docs:
@@ -237,8 +240,8 @@ def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = T
 
         data ['fns'] = fns
         print('Feature Names (Words): ', len(fns))
-        with Timer() as t:
-            if filename and serialize:
+        if filename and serialize:
+            with Timer() as t:
                 util.write_to_file(filename + '_docs' + '.tmp', data['docs'])
                 util.write_to_file(filename + '_DWF' + '.tmp', data['DWF'])
                 util.write_to_file(filename + '_fns' + '.tmp', data['fns'])
@@ -249,36 +252,163 @@ def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = T
 
                 util.write_to_file(filename + '_WWC' + '.tmp', WWC_S)
                 util.write_to_file(filename + '_WWDICE' + '.tmp', WWDICE_S)
-        print ('##### Serialized Data in %4.1fs' % t.secs)
+            print ('##### Serialized Data in %4.1fs' % t.secs)
         print()
     return data
 
-def easy_setup_context_window(filename = None, corpus = 'toy', deserialize = True, serialize = True):
-    return 0
+def easy_setup_context_window(
+    fqt = 10,
+    window_size = 4,
+    score_fn = 'dice',
+    filename = None,
+    corpus = 'toy',
+    deserialize = True,
+    serialize = True):
 
-def retrieve_data_and_tokenize(corpus = 'toy', tokenize_sentences = True):
-    """Retrieves the data from the source and makes a neat array of words, sentences and documents out of it.
+    """Sets up data object for experiments with the WORD CONTEXT = CONTEXT WINDOW
+    """
+
+    def raw_count(*marginals):
+        """Scores ngrams by their frequency"""
+        return marginals[0]
+
+    tokens = words = WWC = None
+    f_prx = filename
+    f_sfx = '.tmp'
+    tokens_filename = f_prx + '_tokens' + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + f_sfx
+    words_filename = f_prx + '_words' + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + f_sfx
+    WWC_filename = f_prx + '_wwmatrix' + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + f_sfx
+
+    if filename and deserialize:
+
+
+        tokens = util.read_from_file(tokens_filename)
+        words = util.read_from_file(words_filename)
+        WWC = util.read_from_file(WWC_filename)
+
+    if not (tokens and words and WWC):
+        with Timer() as t:
+            tokens = retrieve_data_and_tokenize_tokens(corpus = corpus)
+        print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
+
+        print('totaltokens', len(tokens))
+
+        # Reduce the tokens to words that appear more often than fqt.
+
+        words = util.frequency_threshold(tokens, fqt)
+        words = set(words)
+        tokens = [token for token in tokens if token in words]
+
+        print('totalwords', len(words))
+        print('totaltokens after substraction', len(tokens))
+
+        bgm    = collocations.BigramAssocMeasures()
+        finder = collocations.BigramCollocationFinder.from_words(tokens, window_size = window_size)
+
+        if score_fn == 'dice':
+            scored = finder.score_ngrams( bgm.chi_sq )
+        elif score_fn == 'phi_sq':
+            scored = finder.score_ngrams( bgm.phi_sq )
+        elif score_fn == 'chi_sq':
+            scored = finder.score_ngrams( bgm.chi_sq )
+        elif score_fn == 'raw_freq':
+            scored = finder.score_ngrams( bgm.raw_freq )
+        elif score_fn == 'raw_count':
+            scored = finder.score_ngrams( raw_count )
+        else:
+            raise ValueError('Passed Score Function not implemented', score_fn)
+
+        # For faster Reference, Create a dictionary with words as keys and indices as values.
+        # Not very memory efficient, but does enhance performance.
+        words = list(words)
+        words.sort()
+        words_indices = {}
+        for i, word in enumerate(words):
+            words_indices[word] = i
+
+        with Timer() as t:
+            # Create Word-Word-Cooccurrence Matrix
+            WWC = np.zeros( (len(words), len(words)) )
+            print(WWC.shape)
+            for collocation in scored:
+                pair = collocation[0]
+                WWC[words_indices[pair[0]], words_indices[pair[1]]] = collocation[1]
+        print('##### Created Word Word Matrix in %4.1fs' % t.secs)
+
+        if filename and serialize:
+            with Timer() as t:
+
+                util.write_to_file(tokens_filename, tokens)
+                util.write_to_file(words_filename, words)
+                util.write_to_file(WWC_filename, WWC)
+            print ('##### Serialized Data in %4.1fs' % t.secs)
+
+    data = { 'tokens': tokens, 'words': words, 'WWC': WWC }
+    return data
+
+
+def retrieve_data_and_tokenize_tokens(corpus = 'toy'):
+    """Retrieves the data from the corpus and makes a neat array of tokens.
+    [ 'doc1_token1', 'doc1_token2, ..., 'doc_token_m' ]
+    """
+
+    if corpus == 'toy':
+        docs = [
+            'Optional plotz says to frobnicate the bizbaz first. foo bar bar. foo',
+            'Return a foo bang. foo bar. The Ding Dangel Dong Dong foo bang bar.',
+            'foo bang baz padauts remoreng.',
+            'foo bar bar baz foo'
+        ]
+
+        tokens = []
+        for doc in docs:
+            doc = sent_tokenize(doc)
+            for sent in doc:
+                sent = word_tokenize(sent)
+                sent = util.normalize(sent)
+                tokens.extend(sent)
+
+
+    elif corpus == 'brown':
+        # tokens = brown.words(categories = ['news'])
+        tokens = brown.words()
+        tokens = util.normalize(tokens)
+
+    elif corpus == 'reuters':
+        tokens = brown.words()
+        tokens = util.normalize(tokens)
+
+    elif corpus == 'brown_reuters':
+        tokens = brown.words()
+        tokens = util.normalize(tokens)
+        tokens2 = corpus.reuters.words()
+        tokens2 = util.normalize(tokens2)
+        tokens.extend(tokens2)
+    else:
+        raise ValueError('Corpus passed is not implemented.', corpus)
+
+    return tokens
+
+
+def retrieve_data_and_tokenize_sentences(corpus = 'toy'):
+    """Retrieves the data from the corpus and makes a neat array of tokens, sentences and documents out of it.
     [ #docs
         [ #document1
-            ['word1','word2','word3'], #sentence1
-            ['word1','word2','word3'], #sentence2
+            ['token1','token2','token3'], #sentence1
+            ['token1','token2','token3'], #sentence2
         ],
         [ #document2
-            ['word1','word2','word3'], #sentence1
-            ['word1','word2','word3'], #sentence2
+            ['token1','token2','token3'], #sentence1
+            ['token1','token2','token3'], #sentence2
         ]
     ]
 
     """
 
-    # Try to read in a previously processed version of the current Corpus.
-    # Just to speed things up.
-    # If none is found, process it anew!
-
     return_docs = []
 
+    # Compute from Sample Sentences.
     if corpus == 'toy':
-    # docs = ['foo bar bar. boom bam bum. foo', 'foo baz bar', 'foo foo baz baz', 'foo', 'bar derp']
 
         docs = [
             'Optional plotz says to frobnicate the bizbaz first. foo bar bar. foo',
@@ -287,34 +417,20 @@ def retrieve_data_and_tokenize(corpus = 'toy', tokenize_sentences = True):
             'foo bar bar baz foo'
         ]
 
-        ###################################
-        # Compute from Sample Sentences.
-
         return_docs = []
-        if tokenize_sentences:
-            for doc in docs:
-                sents = sent_tokenize(doc)
-                sents = [word_tokenize(sent) for sent in sents]
-                sents = [util.normalize(sent) for sent in sents]
-                return_docs.append(sents)
-        else:
-            for doc in docs:
-                words = word_tokenize(doc)
-                words = util.normalize(words)
-                return_docs.append(words)
+        for doc in docs:
+            words = word_tokenize(doc)
+            words = util.normalize(words)
+            return_docs.append(words)
 
+    # Compute from brown corpus.
     elif corpus == 'brown':
 
         categories = ['adventure', 'belles_lettres', 'editorial', 'fiction', 'government', 'hobbies', 'humor', 'learned', 'lore', 'mystery', 'news', 'religion', 'reviews', 'romance', 'science_fiction']
-        # categories = ['news', 'editorial', 'reviews']
-        # categories = ['news', 'editorial']
-        # categories = ['news']
-        # sentences = brown.sents(fileids = brown.fileids(categories=categories))
 
         docs = [brown.sents(fileids = fileid) for fileid in brown.fileids(categories=categories)]
 
         ##################################
-        # Compute from brown corpus.
 
         count = 0
         return_docs = []
@@ -740,7 +856,6 @@ def se_mdcs(WWC, fns, word):
     V = np.mean(SWWC, axis = 0)
     # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
     V[V == 0] = 1
-    print(V)
 
     # distance to centroid matrix
     DTC = cdist(SWWC, np.array([centroid]), metric = 'seuclidean', V = V)

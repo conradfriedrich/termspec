@@ -56,6 +56,21 @@ def frequency_threshold(tokens, fqt = 10):
 
     return words
 
+def remove_word_pairs_not_in_corpus(word_pairs, words):
+    if not (word_pairs and words):
+        raise ValueError('Cannot remove word_pairs, array empty')
+
+    return_word_pairs = []
+    for pair in word_pairs:
+        pair_in_words = True
+        for word in pair:
+            word = normalize([word])[0]
+            if word not in words:
+                pair_in_words = False
+        if pair_in_words:
+            return_word_pairs.append(pair)
+    return return_word_pairs
+
 def printprettymatrix(M, rns = None, cns = None):
     """Prints a Matrix with row and columns labels
     Matrix should be dense.
