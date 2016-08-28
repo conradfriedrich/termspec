@@ -71,7 +71,7 @@ def remove_word_pairs_not_in_corpus(word_pairs, words):
             return_word_pairs.append(pair)
     return return_word_pairs
 
-def printprettymatrix(M, rns = None, cns = None):
+def printprettymatrix(M, rns = None, cns = None, filename = None):
     """Prints a Matrix with row and columns labels
     Matrix should be dense.
 
@@ -83,12 +83,16 @@ def printprettymatrix(M, rns = None, cns = None):
     Optional plotz says to frobnicate the bizbaz first.
     """
 
+
     df = pd.DataFrame(M, columns=cns, index=rns)
+    
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.expand_frame_repr', False)
-
-    print(df)
+    if filename:
+        df.to_csv(filename, encoding = 'utf-8')
+    else:
+        print(df.round(2))
 
 def flatten_documents_to_strings(docs):
     """Flattens the given documents in nested form to a string representation:
@@ -162,8 +166,9 @@ def read_from_file(filename):
         data = pickle.load(file)
         file.close()
     except FileNotFoundError as error:
-        print(error)
-        print('Returning empty data...')
+        # print(error)
+        # print('Returning empty data...')
+        0
 
     return data
 

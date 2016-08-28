@@ -2,17 +2,15 @@
 
 import helpers as util
 import numpy as np
-import math
+import matrices
 
 from timer import Timer
 
-from nltk.corpus import brown
+from nltk.corpus import brown, reuters
 from nltk import word_tokenize, sent_tokenize, collocations
 
-from scipy.spatial.distance import pdist, cdist, squareform
 from scipy import sparse
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 word_pairs = [
     ('food','beverage'),
@@ -162,7 +160,7 @@ word_pairs = [
     ('organ', 'lung')
     ]
 
-def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = True, serialize = True):
+def easy_setup_sentence_context(fqt = 10, filename = None, score_fn = 'raw_count', corpus = 'toy', deserialize = True, serialize = True):
     """Sets up data object for experiments with the WORD CONTEXT = SENTENCES
 
     If a filename is given, tries to deserialize from that file.
@@ -176,23 +174,26 @@ def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = T
 
     data = None
 
+    f_prx = filename
+    f_sfx = 'tmp'
+    DWF_filename = '{}_{}_{}_DWF.{}'.format(f_prx, corpus, score_fn, f_sfx)
+    WWC_filename = '{}_{}_{}_WWC.{}'.format(f_prx, corpus, score_fn, f_sfx)
+    fns_filename = '{}_{}_{}_fns.{}'.format(f_prx, corpus, score_fn, f_sfx)
+
     if filename and deserialize:
-        with Timer() as t:
-            data = {}
-            data['docs'] = util.read_from_file(filename + '_docs' + '.tmp')
-            data['DWF'] = util.read_from_file(filename + '_DWF' + '.tmp')
+        data = {}
+        data['DWF'] = util.read_from_file(DWF_filename)
 
-            # The large matrizes have been serialized in sparse format.
-            WWC_S = util.read_from_file(filename + '_WWC' + '.tmp')
-            WWDICE_S = util.read_from_file(filename + '_WWDICE' + '.tmp')
+        # The large matrizes have been serialized in sparse format.
+        WWC_S = util.read_from_file(WWC_filename)
+        if WWC_S:
             data['WWC'] = np.asarray(WWC_S.todense())
-            data['WWDICE'] = np.asarray(WWDICE_S.todense())
-            data['fns'] = util.read_from_file(filename + '_fns' + '.tmp')
 
-        print ('##### Deserialized Data in %4.1fs' % t.secs)
+        data['fns'] = util.read_from_file(fns_filename)
+
 
     # If any one of these fails, recompute all.
-    if not (data and data['docs'] and data['DWF'] and data['WWC'] and data['WWDICE'] and data['fns']):
+    if not (data and data['DWF'] and data['WWC'] and data['fns']):
         data = {}
         with Timer() as t:
             docs = retrieve_data_and_tokenize_sentences(corpus = corpus)
@@ -203,10 +204,10 @@ def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = T
                 for sent in doc:
                     tokens.extend(sent)
 
-            print('tokens in corpus', len(tokens))
-            words = util.frequency_threshold(tokens, fqt = 10)
+            # print('tokens in corpus', len(tokens))
+            words = util.frequency_threshold(tokens, fqt = fqt)
 
-            print('words', len(words))
+            # print('words', len(words))
             words = set(words)
 
             # Restructure tokens as documents. Quite costly.
@@ -222,38 +223,30 @@ def easy_setup_sentence_context(filename = None, corpus = 'toy', deserialize = T
                         count += len(return_sent)
                 if return_doc:
                     data['docs'].append(return_doc)
-            print ('tokens after reducing', count)
+            # print ('tokens after reducing', count)
 
-        print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
+        # print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
 
-        with Timer() as t:
-            data['DWF'], fns = document_word_frequency_matrix(data['docs'])
-        print('##### Created Document Word Frequency Matrix in %4.1fs' % t.secs)
+        data['DWF'], fns = matrices.document_word_frequency_matrix(data['docs'])
 
-        with Timer() as t:
-            data['WWC'], fns = word_word_cooccurrence_matrix(data['docs'])
-        print('##### Created Word Word Cooccurrence Matrix in %4.1fs' % t.secs)
-
-        with Timer() as t:
-            data['WWDICE'], fns = word_word_dice_coeff_matrix_numpy(data['docs'])
-        print('##### Created Word Word Dice Coefficient Matrix in %4.1fs' % t.secs)
+        if score_fn == 'raw_count':
+            data['WWC'], fns = matrices.word_word_cooccurrence_matrix(data['docs'])
+        elif score_fn == 'dice':
+            data['WWC'], fns = matrices.word_word_dice_coeff_matrix_numpy(data['docs'])
+        else:
+            raise ValueError('Passed Score Function not implemented', score_fn)
 
         data ['fns'] = fns
-        print('Feature Names (Words): ', len(fns))
+
         if filename and serialize:
-            with Timer() as t:
-                util.write_to_file(filename + '_docs' + '.tmp', data['docs'])
-                util.write_to_file(filename + '_DWF' + '.tmp', data['DWF'])
-                util.write_to_file(filename + '_fns' + '.tmp', data['fns'])
+            util.write_to_file(DWF_filename, data['DWF'])
+            util.write_to_file(fns_filename, data['fns'])
 
-                # Let's save about 99% of disk space.
-                WWC_S = sparse.csr_matrix(data['WWC'])
-                WWDICE_S = sparse.csr_matrix(data['WWDICE'])
+            # Let's save about 99% of disk space.
+            WWC_S = sparse.csr_matrix(data['WWC'])
 
-                util.write_to_file(filename + '_WWC' + '.tmp', WWC_S)
-                util.write_to_file(filename + '_WWDICE' + '.tmp', WWDICE_S)
-            print ('##### Serialized Data in %4.1fs' % t.secs)
-        print()
+            util.write_to_file(WWC_filename, WWC_S)
+        # print()
     return data
 
 def easy_setup_context_window(
@@ -272,27 +265,25 @@ def easy_setup_context_window(
         """Scores ngrams by their frequency"""
         return marginals[0]
 
-    tokens = words = WWC = None
+    words = WWC = None
     f_prx = filename
-    f_sfx = '.tmp'
-    tokens_filename = f_prx + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + '_tokens' + f_sfx
-    words_filename = f_prx  + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + '_words' + f_sfx
-    WWC_filename = f_prx + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + '_wwmatrix' + f_sfx
+    f_sfx = 'tmp'
+    words_filename = '{}_{}_ws{}_{}_words.{}'.format(f_prx, corpus, window_size, score_fn, f_sfx)
+    WWC_filename = '{}_{}_ws{}_{}_WWC.{}'.format(f_prx, corpus, window_size, score_fn, f_sfx)
 
     if filename and deserialize:
 
-        tokens = util.read_from_file(tokens_filename)
         words = util.read_from_file(words_filename)
         WWC_S = util.read_from_file(WWC_filename)
-        if WWC_S:
+        if WWC_S != None:
             WWC = np.asarray(WWC_S.todense())
 
-    if not (tokens and words and WWC.any()):
+    if not (words and WWC.any()):
         with Timer() as t:
             tokens = retrieve_data_and_tokenize_tokens(corpus = corpus)
-        print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
+        # print ('##### Retrieved data and Tokenized in %4.1fs' % t.secs)
 
-        print('totaltokens', len(tokens))
+        # print('totaltokens', len(tokens))
 
         # Reduce the tokens to words that appear more often than fqt.
 
@@ -300,8 +291,8 @@ def easy_setup_context_window(
         words = set(words)
         tokens = [token for token in tokens if token in words]
 
-        print('totalwords', len(words))
-        print('totaltokens after substraction', len(tokens))
+        # print('totalwords', len(words))
+        # print('totaltokens after substraction', len(tokens))
 
         bgm    = collocations.BigramAssocMeasures()
         finder = collocations.BigramCollocationFinder.from_words(tokens, window_size = window_size)
@@ -334,18 +325,17 @@ def easy_setup_context_window(
             for collocation in scored:
                 pair = collocation[0]
                 WWC[words_indices[pair[0]], words_indices[pair[1]]] = collocation[1]
-        print('##### Created Word Word Matrix in %4.1fs' % t.secs)
+        # print('##### Created Word Word Matrix in %4.1fs' % t.secs)
 
         if filename and serialize:
             with Timer() as t:
 
-                util.write_to_file(tokens_filename, tokens)
                 util.write_to_file(words_filename, words)
                 WWC_S = sparse.csr_matrix(WWC)
                 util.write_to_file(WWC_filename, WWC_S)
-            print ('##### Serialized Data in %4.1fs' % t.secs)
+            # print ('##### Serialized Data in %4.1fs' % t.secs)
 
-    data = { 'tokens': tokens, 'words': words, 'WWC': WWC }
+    data = { 'words': words, 'WWC': WWC }
     return data
 
 def retrieve_data_and_tokenize_tokens(corpus = 'toy'):
@@ -382,7 +372,7 @@ def retrieve_data_and_tokenize_tokens(corpus = 'toy'):
     elif corpus == 'brown_reuters':
         tokens = brown.words()
         tokens = util.normalize(tokens)
-        tokens2 = corpus.reuters.words()
+        tokens2 = reuters.words()
         tokens2 = util.normalize(tokens2)
         tokens.extend(tokens2)
     else:
@@ -445,41 +435,10 @@ def retrieve_data_and_tokenize_sentences(corpus = 'toy'):
                 returndoc.append(sent)
             return_docs.append(returndoc)
 
-        print(count)
+        # print(count)
 
     else:
-        raise ValueError('Corpus passed is not known.', corpus)
+        raise ValueError('Corpus passed is not implemented.', corpus)
 
     return return_docs
 
-
-    """Computes a tfidf matrix for the given corpus.
-
-    Arguments:
-    docs -- expects docs in the format
-    [ #docs
-        [ #document1
-            ['word1','word2','word3'], #sentence1
-            ['word1','word2','word3'], #sentence2
-        ],
-        [ #document2
-            ['word1','word2','word3'], #sentence1
-            ['word1','word2','word3'], #sentence2
-        ]
-    ]
-
-    Returns:
-    Matrix of tfidf values,
-    List of feature names
-    """
-    # Docs have to be rejoined. The TfidfVectorizer only likes strings as document inputs.
-    # Then calculates tfidf per term in document
-    strdocs = util.flatten_documents_to_strings(docs)
-
-    tfidf_model = TfidfVectorizer()
-
-    X = tfidf_model.fit_transform(strdocs)
-    fns = tfidf_model.get_feature_names()
-    # util.printprettymatrix(X.todense(), cns = fns)
-
-    return X, fns

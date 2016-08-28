@@ -4,28 +4,31 @@ import sys
 sys.path.append("termspec/")
 
 import helpers as util
+import setup_data as sd
+import scores as sc
 
-from termspec import core as ts
 import numpy as np
 from timer import Timer
 
 
-def raw_freq(*marginals):
-    """Scores ngrams by their frequency"""
-    return marginals[0]
 #####################################################################
 # SETUP
 # categories = ['adventure', 'belles_lettres', 'editorial', 'fiction', 'government', 'hobbies', 'humor', 'learned', 'lore', 'mystery', 'news', 'religion', 'reviews', 'romance', 'science_fiction']
 
 filename = 'experiment_e_data'
 
-data = ts.easy_setup_context_window(
+score_fn = 'dice'
+corpus = 'brown_reuters'
+window_size = 4
+results_filename = 'results_' + filename + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + '.csv'
+
+data = sd.easy_setup_context_window(
     fqt = 10,
-    window_size = 4,
-    score_fn = 'raw_count',
-    filename = 'experiment_e_data',
-    corpus = 'brown',
-    deserialize = False,
+    window_size = window_size,
+    score_fn = score_fn,
+    filename = filename,
+    corpus = corpus,
+    deserialize = True,
     serialize = True
     )
 
@@ -34,9 +37,16 @@ tokens = data['tokens']
 # Word-Word Co-occurrence Matrix
 WWC = data['WWC']
 
-word_pairs = util.remove_word_pairs_not_in_corpus(ts.word_pairs, words)
+word_pairs = util.remove_word_pairs_not_in_corpus(sd.word_pairs, words)
 
-scores = ['score1', 'score2']
+scores = [
+    'nzds',
+
+    'mdcs_cosi',
+    'mdcs_seuc',
+
+    'sca_mdcs_cosi',
+    ]
 
 # For each wordpair, calculate ALL the scores!
 word_scores = {}
@@ -46,12 +56,14 @@ for pair in word_pairs:
         if not word in word_scores:
             with Timer() as t:
                 word_scores[word] = {}
-                word_scores[word]['score1'] = ts.se_mdcs(WWC = WWC, word = word, fns = words)
-                word_scores[word]['score2'] = ts.mdcs(WWC = WWC, word = word, fns = words, metric = 'cosine')
+                word_scores[word]['nzds'] = sc.nzds(M = WWC, word = word, fns = words)
 
-                # Total number of different word-Cooccurrences
-            # print('##### Calculated scores for %s in  %4.1f' % (word, t.secs))
-            # print(word_scores[word])
+                word_scores[word]['mdcs_cosi'] = sc.mdcs(WWC = WWC, word = word, fns = words, metric = 'cosine')
+                word_scores[word]['mdcs_seuc'] = sc.mdcs(WWC = WWC, word = word, fns = words, metric = 'seuclidean')
+
+                word_scores[word]['sca_mdcs_cosi'] = sc.sca_mdcs(WWC = WWC, word = word, fns = words, metric = 'cosine')
+            print('##### Calculated scores for %s in  %4.1f' % (word, t.secs))
+            print(word_scores[word])
 
 #####################################################################
 # RESULTS
@@ -66,10 +78,15 @@ for i, pair in enumerate(word_pairs):
         # Checks whether the Score reflects that!
         results[i,j] = word_scores[word_a][score] > word_scores[word_b][score]
 
+total_hits = [np.sum(results, axis = 0)[i] for i, score in enumerate(scores)]
+percent_hits = [np.sum(results, axis = 0)[i] / len(word_pairs) for i, score in enumerate(scores)]
+
+results = np.vstack([results, total_hits, percent_hits])
 
 # for j, score in enumerate(scores):
 #     results[len(word_pairs)] = np.sum(results, axis = 1)
+labels = word_pairs + ['total hits','hit rate']
 
-util.printprettymatrix(M=results, rns = word_pairs, cns = scores)
+util.printprettymatrix(M=results, rns = labels, cns = scores)
 
-print(np.sum(results, axis = 0) / results.shape[0], np.sum(results, axis = 0), results.shape[0])
+# print(np.sum(results, axis = 0) / results.shape[0], np.sum(results, axis = 0), results.shape[0])
