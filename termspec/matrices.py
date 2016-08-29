@@ -199,7 +199,7 @@ def word_word_dice_coeff_matrix(docs):
                             WWDCM[w_i, w_j] += 1
                     else:
                         WWDCM[w_i, w_j] = 1
-    print('##### ##### Counted Cooccurrences for each Word-Word-Combination in each sentence in %4.1fs' % t.secs)
+    # print('##### ##### Counted Cooccurrences for each Word-Word-Combination in each sentence in %4.1fs' % t.secs)
 
     # Calculate the Dice Coefficient for each pair of words
     with Timer() as t:
@@ -207,7 +207,7 @@ def word_word_dice_coeff_matrix(docs):
             for w_j in range(word_count):
                 dc = 2 * (WWDCM[w_i, w_j]) / (word_counts[w_i] + word_counts[w_j])
                 WWDCM[w_i, w_j] = dc
-    print('##### ##### Calculated Dice Coefficient for each Word-Word-Combination in %4.1fs' % t.secs)
+    # print('##### ##### Calculated Dice Coefficient for each Word-Word-Combination in %4.1fs' % t.secs)
 
     # util.printprettymatrix(M = WWDCM, cns = fns, rns = fns)
 

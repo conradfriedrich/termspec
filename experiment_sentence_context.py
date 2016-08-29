@@ -14,11 +14,12 @@ from timer import Timer
 # SETUP
 
 def conduct(verbose = True, corpus = 'brown', score_fn = 'dice'):
+    print()
     print('Conducting Experiment with Sentence Context...')
     print('Corpus: {}, Score Function: {}'.format(corpus, score_fn))
 
     filename = 'experiment_sentence_context'
-    data = sd.easy_setup_sentence_context(filename = filename, score_fn = score_fn, corpus = 'brown', deserialize = True, serialize = True)
+    data = sd.easy_setup_sentence_context(filename = filename, score_fn = score_fn, corpus = corpus, deserialize = True, serialize = True)
 
     scores = [
         'occ',

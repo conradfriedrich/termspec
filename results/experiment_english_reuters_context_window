@@ -1,0 +1,483 @@
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 2, Score Function: raw_count
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00      51.00      64.00          52.00
+hit rate     0.79       0.61       0.76           0.62
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 2, Score Function: chi_sq
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00      66.00      66.00          61.00
+hit rate     0.79       0.79       0.79           0.73
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 2, Score Function: dice
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00      62.00      66.00          44.00
+hit rate     0.79       0.74       0.79           0.52
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 3, Score Function: raw_count
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      47.00      63.00          45.00
+hit rate     0.77       0.56       0.75           0.54
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 3, Score Function: chi_sq
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      61.00      65.00          58.00
+hit rate     0.77       0.73       0.77           0.69
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 3, Score Function: dice
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      57.00      65.00          36.00
+hit rate     0.77       0.68       0.77           0.43
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 4, Score Function: raw_count
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      55.00      56.00          53.00
+hit rate     0.77       0.65       0.67           0.63
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 4, Score Function: chi_sq
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      56.00       67.0          58.00
+hit rate     0.77       0.67        0.8           0.69
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 4, Score Function: dice
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00       59.0       67.0          35.00
+hit rate     0.77        0.7        0.8           0.42
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 5, Score Function: raw_count
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      57.00       50.0          55.00
+hit rate     0.77       0.68        0.6           0.65
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 5, Score Function: chi_sq
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      56.00       67.0          57.00
+hit rate     0.77       0.67        0.8           0.68
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 5, Score Function: dice
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  65.00      60.00      64.00          31.00
+hit rate     0.77       0.71       0.76           0.37
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 8, Score Function: raw_count
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00       59.0      33.00          58.00
+hit rate     0.79        0.7       0.39           0.69
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 8, Score Function: chi_sq
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00       50.0      68.00          46.00
+hit rate     0.79        0.6       0.81           0.55
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 8, Score Function: dice
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00      56.00      64.00          36.00
+hit rate     0.79       0.67       0.76           0.43
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 10, Score Function: raw_count
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00       59.0      26.00           59.0
+hit rate     0.79        0.7       0.31            0.7
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 10, Score Function: chi_sq
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00       50.0      68.00           50.0
+hit rate     0.79        0.6       0.81            0.6
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 10, Score Function: dice
+             nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  66.00      58.00      62.00           42.0
+hit rate     0.79       0.69       0.74            0.5
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 15, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      63.00      21.00          63.00
+hit rate     0.8       0.75       0.25           0.75
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 15, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      52.00      68.00          55.00
+hit rate     0.8       0.62       0.81           0.65
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 15, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      62.00      63.00          49.00
+hit rate     0.8       0.74       0.75           0.58
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 20, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      64.00      22.00          62.00
+hit rate     0.8       0.76       0.26           0.74
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 20, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      55.00      69.00          51.00
+hit rate     0.8       0.65       0.82           0.61
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 20, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      62.00      63.00          52.00
+hit rate     0.8       0.74       0.75           0.62
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 22, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      65.00      22.00          65.00
+hit rate     0.8       0.77       0.26           0.77
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 22, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      57.00      69.00          48.00
+hit rate     0.8       0.68       0.82           0.57
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 22, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      62.00      65.00          54.00
+hit rate     0.8       0.74       0.77           0.64
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 24, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      65.00      20.00          65.00
+hit rate     0.8       0.77       0.24           0.77
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 24, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      58.00      69.00          48.00
+hit rate     0.8       0.69       0.82           0.57
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 24, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      64.00      65.00          54.00
+hit rate     0.8       0.76       0.77           0.64
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 25, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0       67.0      20.00          68.00
+hit rate     0.8        0.8       0.24           0.81
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 25, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      58.00      70.00          51.00
+hit rate     0.8       0.69       0.83           0.61
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 25, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      64.00      66.00          54.00
+hit rate     0.8       0.76       0.79           0.64
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 26, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      66.00      21.00           67.0
+hit rate     0.8       0.79       0.25            0.8
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 26, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0       59.0      69.00           50.0
+hit rate     0.8        0.7       0.82            0.6
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 26, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      65.00      66.00          55.00
+hit rate     0.8       0.77       0.79           0.65
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 28, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0       67.0      20.00          68.00
+hit rate     0.8        0.8       0.24           0.81
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 28, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      60.00      68.00          49.00
+hit rate     0.8       0.71       0.81           0.58
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 28, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      66.00      66.00          56.00
+hit rate     0.8       0.79       0.79           0.67
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 30, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      66.00      22.00          66.00
+hit rate     0.8       0.79       0.26           0.79
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 30, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      61.00      68.00          47.00
+hit rate     0.8       0.73       0.81           0.56
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 30, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      65.00      66.00          56.00
+hit rate     0.8       0.77       0.79           0.67
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 36, Score Function: raw_count
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      68.00      20.00           67.0
+hit rate     0.8       0.81       0.24            0.8
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 36, Score Function: chi_sq
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      60.00      66.00          48.00
+hit rate     0.8       0.71       0.79           0.57
+
+Conducting Experiment with Context Window...
+Corpus: reuters, Window Size: 36, Score Function: dice
+            nzds  mdcs_cosi  mdcs_seuc  sca_mdcs_cosi
+total hits  67.0      65.00      66.00          58.00
+hit rate     0.8       0.77       0.79           0.69
+{
+    "chi_sq": {
+        "mdcs_cosi": [
+            0.7857142857142857,
+            0.7261904761904762,
+            0.6666666666666666,
+            0.6666666666666666,
+            0.5952380952380952,
+            0.5952380952380952,
+            0.6190476190476191,
+            0.6547619047619048,
+            0.6785714285714286,
+            0.6904761904761905,
+            0.6904761904761905,
+            0.7023809523809523,
+            0.7142857142857143,
+            0.7261904761904762,
+            0.7142857142857143
+        ],
+        "mdcs_seuc": [
+            0.7857142857142857,
+            0.7738095238095238,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.8095238095238095,
+            0.8095238095238095,
+            0.8095238095238095,
+            0.8214285714285714,
+            0.8214285714285714,
+            0.8214285714285714,
+            0.8333333333333334,
+            0.8214285714285714,
+            0.8095238095238095,
+            0.8095238095238095,
+            0.7857142857142857
+        ],
+        "nzds": [
+            0.7857142857142857,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7857142857142857,
+            0.7857142857142857,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477
+        ],
+        "sca_mdcs_cosi": [
+            0.7261904761904762,
+            0.6904761904761905,
+            0.6904761904761905,
+            0.6785714285714286,
+            0.5476190476190477,
+            0.5952380952380952,
+            0.6547619047619048,
+            0.6071428571428571,
+            0.5714285714285714,
+            0.5714285714285714,
+            0.6071428571428571,
+            0.5952380952380952,
+            0.5833333333333334,
+            0.5595238095238095,
+            0.5714285714285714
+        ]
+    },
+    "dice": {
+        "mdcs_cosi": [
+            0.7380952380952381,
+            0.6785714285714286,
+            0.7023809523809523,
+            0.7142857142857143,
+            0.6666666666666666,
+            0.6904761904761905,
+            0.7380952380952381,
+            0.7380952380952381,
+            0.7380952380952381,
+            0.7619047619047619,
+            0.7619047619047619,
+            0.7738095238095238,
+            0.7857142857142857,
+            0.7738095238095238,
+            0.7738095238095238
+        ],
+        "mdcs_seuc": [
+            0.7857142857142857,
+            0.7738095238095238,
+            0.7976190476190477,
+            0.7619047619047619,
+            0.7619047619047619,
+            0.7380952380952381,
+            0.75,
+            0.75,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7857142857142857,
+            0.7857142857142857,
+            0.7857142857142857,
+            0.7857142857142857,
+            0.7857142857142857
+        ],
+        "nzds": [
+            0.7857142857142857,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7857142857142857,
+            0.7857142857142857,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477
+        ],
+        "sca_mdcs_cosi": [
+            0.5238095238095238,
+            0.42857142857142855,
+            0.4166666666666667,
+            0.36904761904761907,
+            0.42857142857142855,
+            0.5,
+            0.5833333333333334,
+            0.6190476190476191,
+            0.6428571428571429,
+            0.6428571428571429,
+            0.6428571428571429,
+            0.6547619047619048,
+            0.6666666666666666,
+            0.6666666666666666,
+            0.6904761904761905
+        ]
+    },
+    "raw_count": {
+        "mdcs_cosi": [
+            0.6071428571428571,
+            0.5595238095238095,
+            0.6547619047619048,
+            0.6785714285714286,
+            0.7023809523809523,
+            0.7023809523809523,
+            0.75,
+            0.7619047619047619,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7976190476190477,
+            0.7857142857142857,
+            0.7976190476190477,
+            0.7857142857142857,
+            0.8095238095238095
+        ],
+        "mdcs_seuc": [
+            0.7619047619047619,
+            0.75,
+            0.6666666666666666,
+            0.5952380952380952,
+            0.39285714285714285,
+            0.30952380952380953,
+            0.25,
+            0.2619047619047619,
+            0.2619047619047619,
+            0.23809523809523808,
+            0.23809523809523808,
+            0.25,
+            0.23809523809523808,
+            0.2619047619047619,
+            0.23809523809523808
+        ],
+        "nzds": [
+            0.7857142857142857,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.7857142857142857,
+            0.7857142857142857,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477,
+            0.7976190476190477
+        ],
+        "sca_mdcs_cosi": [
+            0.6190476190476191,
+            0.5357142857142857,
+            0.6309523809523809,
+            0.6547619047619048,
+            0.6904761904761905,
+            0.7023809523809523,
+            0.75,
+            0.7380952380952381,
+            0.7738095238095238,
+            0.7738095238095238,
+            0.8095238095238095,
+            0.7976190476190477,
+            0.8095238095238095,
+            0.7857142857142857,
+            0.7976190476190477
+        ]
+    }
+}
+[Finished in 552.8s]

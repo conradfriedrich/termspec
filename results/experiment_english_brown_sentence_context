@@ -1,0 +1,13 @@
+
+Conducting Experiment with Sentence Context...
+Corpus: brown, Score Function: raw_count
+              occ    dfs   nzds  mdcs_cosi  mdcs_eucl  mdcs_sqeu  mdcs_seuc  sca_mdcs_cosi  sca_mdcs_eucl  sca_mdcs_sqeu  sca_mdcs_seuc
+total hits  65.00  66.00  65.00      38.00      18.00       17.0      61.00          36.00          61.00          60.00          64.00
+hit rate     0.77   0.79   0.77       0.45       0.21        0.2       0.73           0.43           0.73           0.71           0.76
+
+Conducting Experiment with Sentence Context...
+Corpus: brown, Score Function: dice
+              occ    dfs   nzds  mdcs_cosi  mdcs_eucl  mdcs_sqeu  mdcs_seuc  sca_mdcs_cosi  sca_mdcs_eucl  sca_mdcs_sqeu  sca_mdcs_seuc
+total hits  65.00  66.00  65.00      62.00      66.00      65.00      65.00           34.0          21.00          20.00          39.00
+hit rate     0.77   0.79   0.77       0.74       0.79       0.77       0.77            0.4           0.25           0.24           0.46
+[Finished in 79.0s]

@@ -12,8 +12,8 @@ from timer import Timer
 
 
 def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'):
-
-    print('Conducting Experiment with Context Windows...')
+    print()
+    print('Conducting Experiment with Context Window...')
     print('Corpus: {}, Window Size: {}, Score Function: {}'.format(corpus, window_size, score_fn))
 
     filename = 'experiment_context_window'

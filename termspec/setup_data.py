@@ -186,14 +186,14 @@ def easy_setup_sentence_context(fqt = 10, filename = None, score_fn = 'raw_count
 
         # The large matrizes have been serialized in sparse format.
         WWC_S = util.read_from_file(WWC_filename)
-        if WWC_S:
+        if not WWC_S is None:
             data['WWC'] = np.asarray(WWC_S.todense())
 
         data['fns'] = util.read_from_file(fns_filename)
 
 
     # If any one of these fails, recompute all.
-    if not (data and data['DWF'] and data['WWC'] and data['fns']):
+    if (data is None or data['DWF'] is None or data['WWC'] is None or data['fns'] is None):
         data = {}
         with Timer() as t:
             docs = retrieve_data_and_tokenize_sentences(corpus = corpus)
@@ -275,7 +275,7 @@ def easy_setup_context_window(
 
         words = util.read_from_file(words_filename)
         WWC_S = util.read_from_file(WWC_filename)
-        if WWC_S != None:
+        if not WWC_S is None:
             WWC = np.asarray(WWC_S.todense())
 
     if not (words and WWC.any()):
@@ -298,7 +298,7 @@ def easy_setup_context_window(
         finder = collocations.BigramCollocationFinder.from_words(tokens, window_size = window_size)
 
         if score_fn == 'dice':
-            scored = finder.score_ngrams( bgm.chi_sq )
+            scored = finder.score_ngrams( bgm.dice )
         elif score_fn == 'phi_sq':
             scored = finder.score_ngrams( bgm.phi_sq )
         elif score_fn == 'chi_sq':
@@ -321,7 +321,7 @@ def easy_setup_context_window(
         with Timer() as t:
             # Create Word-Word-Cooccurrence Matrix
             WWC = np.zeros( (len(words), len(words)) )
-            print(WWC.shape)
+            # print(WWC.shape)
             for collocation in scored:
                 pair = collocation[0]
                 WWC[words_indices[pair[0]], words_indices[pair[1]]] = collocation[1]
