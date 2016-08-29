@@ -51,3 +51,5 @@ print cooccurrences['attitude']
 
 
 # TODO: Freq dist bei sentence context einbauen
+
+# It could be very important to see how significant the difference between the two scores is. To see that, calculate the standard deviation from random samples of any two words and compare it to the difference between the focus terms. Then, the larger the difference, the more significant (statistical significance lies somewhere around 3 standard deviations i think)

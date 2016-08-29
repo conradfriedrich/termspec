@@ -14,7 +14,6 @@ import numpy as np
 def normalize(words, language = 'english'):
     #  removes stopwords, lowercases, removes non-alphanumerics and stems (snowball)
     # words: list of strings
-
     # assert not isinstance(lst, basestring)
     def ispunctuation(word):
         punctuation = string.punctuation + "„“”—–"
@@ -28,19 +27,14 @@ def normalize(words, language = 'english'):
 
     #lowercase all terms
     words = [w.lower() for w in words]
-
     # stem (snowball)
     words = [stemmer.stem(w) for w in words]
-
     # remove all numerical terms
     words = [w for w in words if not w.isnumeric()]
-
     # remove pure punctuations
     words = [w for w in words if not ispunctuation(w)]
-
     #remove stopwords
     words = [w for w in words if not w in stopwords]
-
     #remove short words
     words = [w for w in words if not len(w) < 3]
 
@@ -56,7 +50,10 @@ def frequency_threshold(tokens, fqt = 10):
 
     return words
 
-def remove_word_pairs_not_in_corpus(word_pairs, words):
+def remove_word_pairs_not_in_corpus(word_pairs, words, language = 'english'):
+    """Only return those word pairs in @word_pairs of which both words are in @words
+
+    Expects @words to already be normalized"""
     if not (word_pairs and words):
         raise ValueError('Cannot remove word_pairs, array empty')
 
@@ -64,12 +61,23 @@ def remove_word_pairs_not_in_corpus(word_pairs, words):
     for pair in word_pairs:
         pair_in_words = True
         for word in pair:
-            word = normalize([word])[0]
+            word = normalize([word], language)[0]
             if word not in words:
                 pair_in_words = False
         if pair_in_words:
             return_word_pairs.append(pair)
     return return_word_pairs
+
+def remove_words_not_in_list(word_list, words, language = 'english'):
+    """Only return those strings of @word_list that are also in @words
+
+    Expects @words to already be normalized
+    """
+    if not (word_list and words):
+        raise ValueError('Cannot remove word_pairs, array empty')
+
+    word_list = [w for w in word_list if normalize([w], language)[0] in words]
+    return word_list
 
 def printprettymatrix(M, rns = None, cns = None, filename = None):
     """Prints a Matrix with row and columns labels

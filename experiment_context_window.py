@@ -11,10 +11,10 @@ import numpy as np
 from timer import Timer
 
 
-def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'):
-    print()
+def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice', language = 'english'):
+    
     print('Conducting Experiment with Context Window...')
-    print('Corpus: {}, Window Size: {}, Score Function: {}'.format(corpus, window_size, score_fn))
+    print('Language: {}, Corpus: {}, Window Size: {}, Score Function: {}'.format(language, corpus, window_size, score_fn))
 
     filename = 'experiment_context_window'
 
@@ -34,7 +34,15 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
     # Word-Word Co-occurrence Matrix
     WWC = data['WWC']
 
-    word_pairs = util.remove_word_pairs_not_in_corpus(sd.word_pairs, words)
+    if language is 'german':
+        print(len(sd.word_pairs_german))
+        print(sd.word_pairs_german)
+        word_pairs = util.remove_word_pairs_not_in_corpus(sd.word_pairs_german, words, language = 'german')
+    else:
+        word_pairs = util.remove_word_pairs_not_in_corpus(sd.word_pairs, words)
+
+    # print(len(word_pairs))
+    # print(word_pairs)
 
     scores = [
         'nzds',
@@ -49,7 +57,7 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
     word_scores = {}
     for pair in word_pairs:
         for word in pair:
-            word = util.normalize([word])[0]
+            word = util.normalize([word], language)[0]
             if not word in word_scores:
                 with Timer() as t:
                     word_scores[word] = {}
@@ -68,8 +76,8 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
     results = np.zeros( (len(word_pairs),len(scores)), dtype=bool)
 
     for i, pair in enumerate(word_pairs):
-        word_a = util.normalize([pair[0]])[0]
-        word_b = util.normalize([pair[1]])[0]
+        word_a = util.normalize([pair[0]], language)[0]
+        word_b = util.normalize([pair[1]], language)[0]
         for j, score in enumerate(scores):
             # By Convention, the More General Term comes first in word_pairs.
             # Checks whether the Score reflects that!

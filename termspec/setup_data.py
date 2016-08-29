@@ -6,7 +6,7 @@ import matrices
 
 from timer import Timer
 
-from nltk.corpus import brown, reuters
+from nltk.corpus import brown, reuters, ConllCorpusReader
 from nltk import word_tokenize, sent_tokenize, collocations
 
 from scipy import sparse
@@ -160,6 +160,137 @@ word_pairs = [
     ('organ', 'lung')
     ]
 
+word_pairs_german = [
+    ('Essen','Getränk'),
+    ('Essen','Nachtisch'),
+    ('Essen','Brot'),
+    ('Essen','Käse'),
+    ('Essen','Fleisch'),
+    ('Essen','Gericht'),
+    ('Essen','Butter'),
+    ('Essen','Kuchen'),
+    ('Essen','Eier'),
+    ('Essen','Süßigkeit'),
+    ('Essen','Gebäck'),
+    ('Essen','Gemüse'),
+    ('Essen','Frucht'),
+    ('Essen','Sandwich'),
+    ('Essen','Suppe'),
+    ('Essen','Pizza'),
+    ('Essen','Salat'),
+    ('Essen', 'Würze'),
+    ('Essen', 'Oliven'),
+    ('Essen', 'Ketchup'),
+    ('Essen', 'Keks'),
+
+    ('Getränk', 'Cola'),
+
+    ('Alkohol','Schnaps'),
+    ('Alkohol','Gin'),
+    ('Alkohol','Rum'),
+    ('Alkohol','Brandy'),
+    ('Alkohol','Cognac'),
+    ('Alkohol','Wein'),
+    ('Alkohol','Champagner'),
+
+    ('Fleisch', 'Leber'),
+    ('Fleisch', 'Schinken'),
+
+    ('Gericht', 'Sandwich'),
+    ('Gericht','Suppe'),
+    ('Gericht','Pizza'),
+    ('Gericht','Salat'),
+
+    ('Gemüse', 'Tomate'),
+    ('Gemüse', 'Pilze'),
+    ('Gemüse', 'Hülsenfrucht'),
+
+    ('Frucht', 'Ananas'),
+    ('Frucht', 'Apfel'),
+    ('Frucht', 'Pfirsich'),
+    ('Frucht', 'Erdbeere'),
+
+    ('Fahrzeug','truck'),
+    ('Fahrzeug','Auto'),
+    ('Fahrzeug','Anhänger'),
+    ('Fahrzeug','Wohnwagen'),
+
+    ('Auto', 'jeep'),
+    ('Auto','Taxi'),
+    ('Auto','Coupe'),
+
+    ('Person','Arbeiter'),
+    ('Person','Autor'),
+    ('Person','Intellektueller'),
+    ('Person','Fachkraft'),
+    ('Person','Führung'),
+    ('Person','Unterhalter'),
+    ('Person','Ingenieur'),
+
+    ('Intellektueller','Physiker'),
+    ('Intellektueller','Chemiker'),
+
+    ('Fachkraft','Arzt'),
+    ('Fachkraft','Lehrer'),
+    ('Fachkraft','Krankenpfleger'),
+    ('professional','Zahnarzt'),
+
+    ('Ding','Organismus'),
+    ('Ding','Object'),
+
+    ('Tier', 'Säugetier'),
+    ('Tier', 'Vogel'),
+    ('Tier','Hund'),
+    ('Tier','Katze'),
+    ('Tier','Pferd'),
+    ('Tier','Huhn'),
+    ('Tier','Ente'),
+    ('Tier','Fisch'),
+    ('Tier','Schildkröte'),
+    ('Tier','Schlange'),
+
+    ('Säugetier','Rind'),
+    ('Säugetier','Hund'),
+    ('Säugetier','Katze'),
+    ('Säugetier','Pferd'),
+
+    ('Vogel', 'Huhn'),
+    ('Vogel', 'Ente'),
+
+    ('Fisch', 'Hering'),
+    ('Fisch', 'Lachs'),
+    ('Fisch', 'Forelle'),
+
+    ('Metall', 'Legierung'),
+    ('Metall', 'Stahl'),
+    ('Metall', 'Gold'),
+    ('Metall', 'Silver'),
+    ('Metall', 'Eisen'),
+
+    ('Flüssigkeit', 'Wasser'),
+    # ('Ware', 'Kleidung'),
+    # ('Ware', 'Gerät'),
+    ('Gegenstand', 'Abdeckung'),
+    ('Gegenstand', 'Lack'),
+    ('Gegenstand', 'Dach'),
+    ('Gegenstand', 'Vorhang'),
+    ('Veröffentlichung', 'Buch'),
+    ('Veröffentlichung', 'Artikel'),
+    ('Gegenstand', 'Schmuck'),
+    ('Gegenstand', 'Medikament'),
+    ('Gewebe', 'Nylon'),
+    ('Gewebe', 'Wolle'),
+    ('Gewebe', 'Baumwolle'),
+    ('Einrichtung', 'Flughafen'),
+    ('Einrichtung', 'Zentrale'),
+    ('Einrichtung', 'Bahnhof'),
+    ('Bauwerk', 'Haus'),
+    ('Bauwerk', 'Fabrik'),
+    ('Bauwerk', 'Geschäft'),
+    ('Organ', 'Herz'),
+    ('Organ', 'Lunge')
+    ]
+
 def easy_setup_sentence_context(fqt = 10, filename = None, score_fn = 'raw_count', corpus = 'toy', deserialize = True, serialize = True):
     """Sets up data object for experiments with the WORD CONTEXT = SENTENCES
 
@@ -180,7 +311,7 @@ def easy_setup_sentence_context(fqt = 10, filename = None, score_fn = 'raw_count
     WWC_filename = '{}_{}_{}_WWC.{}'.format(f_prx, corpus, score_fn, f_sfx)
     fns_filename = '{}_{}_{}_fns.{}'.format(f_prx, corpus, score_fn, f_sfx)
 
-    if filename and deserialize:
+    if deserialize:
         data = {}
         data['DWF'] = util.read_from_file(DWF_filename)
 
@@ -238,7 +369,7 @@ def easy_setup_sentence_context(fqt = 10, filename = None, score_fn = 'raw_count
 
         data ['fns'] = fns
 
-        if filename and serialize:
+        if serialize:
             util.write_to_file(DWF_filename, data['DWF'])
             util.write_to_file(fns_filename, data['fns'])
 
@@ -268,10 +399,10 @@ def easy_setup_context_window(
     words = WWC = None
     f_prx = filename
     f_sfx = 'tmp'
-    words_filename = '{}_{}_ws{}_{}_words.{}'.format(f_prx, corpus, window_size, score_fn, f_sfx)
-    WWC_filename = '{}_{}_ws{}_{}_WWC.{}'.format(f_prx, corpus, window_size, score_fn, f_sfx)
+    words_filename = '{}_{}_ws{}_fqt{}_{}_words.{}'.format(f_prx, corpus, window_size, fqt, score_fn, f_sfx)
+    WWC_filename = '{}_{}_ws{}_fqt{}_{}_WWC.{}'.format(f_prx, corpus, window_size, fqt, score_fn, f_sfx)
 
-    if filename and deserialize:
+    if deserialize:
 
         words = util.read_from_file(words_filename)
         WWC_S = util.read_from_file(WWC_filename)
@@ -327,7 +458,7 @@ def easy_setup_context_window(
                 WWC[words_indices[pair[0]], words_indices[pair[1]]] = collocation[1]
         # print('##### Created Word Word Matrix in %4.1fs' % t.secs)
 
-        if filename and serialize:
+        if serialize:
             with Timer() as t:
 
                 util.write_to_file(words_filename, words)
@@ -366,7 +497,7 @@ def retrieve_data_and_tokenize_tokens(corpus = 'toy'):
         tokens = util.normalize(tokens)
 
     elif corpus == 'reuters':
-        tokens = brown.words()
+        tokens = reuters.words()
         tokens = util.normalize(tokens)
 
     elif corpus == 'brown_reuters':
@@ -375,6 +506,13 @@ def retrieve_data_and_tokenize_tokens(corpus = 'toy'):
         tokens2 = reuters.words()
         tokens2 = util.normalize(tokens2)
         tokens.extend(tokens2)
+    elif corpus == 'tiger':
+        root = '/Users/conrad/Documents/uni/2016SS/SpinfoHausarbeit/py/termspec/corpus'
+        fileid = 'tiger_aug07.conll09'
+        columntypes = ['ignore', 'words', 'ignore', 'ignore', 'pos']
+        tiger = ConllCorpusReader(root, fileid, columntypes, encoding='utf8')
+        tokens = tiger.words()
+        tokens = util.normalize(tokens, language = 'german')
     else:
         raise ValueError('Corpus passed is not implemented.', corpus)
 

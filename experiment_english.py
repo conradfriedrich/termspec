@@ -4,8 +4,8 @@ import experiment_context_window as ecw
 import experiment_sentence_context as esc
 import json
 
-# corpus = 'reuters'
-corpus = 'brown'
+# corpus = 'brown'
+corpus = 'reuters'
 
 score_fns = ['raw_count', 'dice']
 
@@ -17,7 +17,7 @@ score_fns = ['raw_count', 'chi_sq', 'dice']
 
 score_lists = {}
 
-for window_size in [2,3,4,5,8,10,15,20,22,24,25,26,28,30,34,36,40,46]:
+for window_size in [2,3,4,5,8,10,15,20,22,24,25,26,28,30,34,36,40,46,52,60]:
     for score_fn in score_fns:
 
         if not score_fn in score_lists:
