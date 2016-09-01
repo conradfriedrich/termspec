@@ -4,20 +4,23 @@ import experiment_context_window as ecw
 import experiment_sentence_context as esc
 import json
 
-# corpus = 'brown'
-corpus = 'reuters'
+corpus = 'brown'
+# corpus = 'reuters'
 
-score_fns = ['raw_count', 'dice']
+# score_fns = ['raw_count', 'dice']
 
 # for score_fn in score_fns:
 #     esc.conduct(verbose = False, corpus = corpus, score_fn = score_fn)
 
 
-score_fns = ['raw_count', 'chi_sq', 'dice']
+score_fns = ['binary', 'raw_count', 'chi_sq', 'dice']
+# score_fns = ['raw_count']
 
 score_lists = {}
 
-for window_size in [2,3,4,5,8,10,15,20,22,24,25,26,28,30,34,36,40,46,52,60]:
+for window_size in [2,3,4,5,8,10,15,20,25,30,35,40,46,52,60,80,100]:
+
+# for window_size in [90,100,110]:
     for score_fn in score_fns:
 
         if not score_fn in score_lists:

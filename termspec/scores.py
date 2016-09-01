@@ -87,13 +87,13 @@ def acds(WWC, fns, word, metric = 'cosine'):
     # print(CSM)
     return CSM.mean()
 
-def mdcs(WWC, fns, word, metric = 'cosine'):
+def mdcs(WWC, fns, word, metric = 'cosine', scaled = False):
     """Computes the Mean Context Distance from the Centroid of the Context."""
 
     context_vector = WWC[fns.index(word)]
     indices = np.flatnonzero(context_vector)
     indices = indices[indices != fns.index(word)]
-
+    context_vector = context_vector[indices]
     # The Subset of WWC with just the context vector's rows
     # So that the average can be Computed more efficiently.
     SWWC = WWC[indices,:]
@@ -101,55 +101,28 @@ def mdcs(WWC, fns, word, metric = 'cosine'):
 
     if metric == 'seuclidean':
         # Variance of the Columns.
-        V = np.mean(SWWC, axis = 0)
+        # Mean of every Column
+        MEAN = np.mean(SWWC, axis = 0)
+        # Square Root of the Standard Deviation
+        RSD = SWWC - MEAN
+        # Standard Deviations
+        SD = RSD*RSD
+        # Variance is the mean of the standard deviations
+        VARIANCE = np.mean(SD, axis = 0)
         # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
-        V[V == 0] = 1
-
+        VARIANCE[VARIANCE == 0] = 1
         # distance to centroid matrix
-        DTC = cdist(SWWC, np.array([centroid]), metric, V = V)
+        DTC = cdist(SWWC, np.array([centroid]), metric, V = VARIANCE)
     else:
         # distance to centroid matrix
         DTC = cdist(SWWC, np.array([centroid]), metric)
+    if scaled:
+        DTC = DTC * context_vector[:, np.newaxis]
 
-    # Return the mean distance to the centroid
     return DTC.mean()
-
-
-def sca_mdcs(WWC, fns, word, metric = 'cosine'):
-    """Computes the Mean Context Distance from the Centroid of the Context."""
-
-    context_vector = WWC[fns.index(word)]
-    indices = np.flatnonzero(context_vector)
-    indices = indices[indices != fns.index(word)]
-
-    # The Subset of WWC with just the context vector's rows
-    # So that the average can be Computed more efficiently.
-    SWWC = WWC[indices,:]
-
-    #Scale the Vectors by Significance of Cooccurrence with Focus word!
-    context_vector = context_vector[indices]
-    SCALEDSWWC = SWWC * context_vector[:, np.newaxis]
-
-    centroid = np.mean(SCALEDSWWC, axis=0)
-
-    if metric =='seuclidean':
-            # Variance of the Columns.
-        V = np.mean(SCALEDSWWC, axis = 0)
-        # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
-        V[V == 0] = 1
-
-        # distance to centroid matrix
-        DTC = cdist(SCALEDSWWC, np.array([centroid]), metric, V = V)
-    else:
-        # distance to centroid matrix
-        DTC = cdist(SCALEDSWWC, np.array([centroid]), metric)
-
-    # Return the mean distance to the centroid
-    return DTC.mean()
-
 
 # DEPRECATED
-def mdcs_mc(WWC, fns, word, mc = 50, metric = 'cosine'):
+def depr_mdcs_mc(WWC, fns, word, mc = 50, metric = 'cosine'):
     """Computes the Mean Context Distance from the Centroid of the Context.
 
     Uses only the @mc most significant co-occurrences!
@@ -183,7 +156,7 @@ def mdcs_mc(WWC, fns, word, mc = 50, metric = 'cosine'):
     # Return the mean distance to the centroid
     return DTC.mean()
 
-def mdcs_occ(WWC, fns, word, occ = 10, metric = 'cosine'):
+def depr_mdcs_occ(WWC, fns, word, occ = 10, metric = 'cosine'):
     """Computes the Mean Context Distance from the Centroid of the Context."""
 
     context_vector = WWC[fns.index(word)]
@@ -202,3 +175,36 @@ def mdcs_occ(WWC, fns, word, occ = 10, metric = 'cosine'):
 
     # Return the mean distance to the centroid times the logarithm of occurrence
     return DTC.mean() * math.log(occ)
+
+
+def depr_sca_mdcs(WWC, fns, word, metric = 'cosine'):
+    """Computes the Mean Context Distance from the Centroid of the Context."""
+
+    context_vector = WWC[fns.index(word)]
+    indices = np.flatnonzero(context_vector)
+    indices = indices[indices != fns.index(word)]
+
+    # The Subset of WWC with just the context vector's rows
+    # So that the average can be Computed more efficiently.
+    SWWC = WWC[indices,:]
+
+    #Scale the Vectors by Significance of Cooccurrence with Focus word!
+    context_vector = context_vector[indices]
+    SCALEDSWWC = SWWC * context_vector[:, np.newaxis]
+
+    centroid = np.mean(SCALEDSWWC, axis=0)
+
+    if metric =='seuclidean':
+            # Variance of the Columns.
+        V = np.mean(SCALEDSWWC, axis = 0)
+        # Can't divide by 0 in all-zero-dimension cases, so just set them to 1
+        V[V == 0] = 1
+
+        # distance to centroid matrix
+        DTC = cdist(SCALEDSWWC, np.array([centroid]), metric, V = V)
+    else:
+        # distance to centroid matrix
+        DTC = cdist(SCALEDSWWC, np.array([centroid]), metric)
+
+    # Return the mean distance to the centroid
+    return DTC.mean()
