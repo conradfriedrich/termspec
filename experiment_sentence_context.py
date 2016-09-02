@@ -28,12 +28,10 @@ def conduct(verbose = True, corpus = 'brown', score_fn = 'dice'):
 
         'mdcs_cosi',
         'mdcs_eucl',
-        'mdcs_sqeu',
-        'mdcs_seuc',
+         'mdcs_seuc',
 
         'sca_mdcs_cosi',
         'sca_mdcs_eucl',
-        'sca_mdcs_sqeu',
         'sca_mdcs_seuc',
         ]
     #####################################################################
@@ -73,13 +71,11 @@ def conduct(verbose = True, corpus = 'brown', score_fn = 'dice'):
 
                     word_scores[word]['mdcs_cosi'] = sc.mdcs(WWC = WWC, word = word, fns = fns, metric = 'cosine')
                     word_scores[word]['mdcs_eucl'] = sc.mdcs(WWC = WWC, word = word, fns = fns, metric = 'euclidean')
-                    word_scores[word]['mdcs_sqeu'] = sc.mdcs(WWC = WWC, word = word, fns = fns, metric = 'sqeuclidean')
                     word_scores[word]['mdcs_seuc'] = sc.mdcs(WWC = WWC, word = word, fns = fns, metric = 'seuclidean')
 
-                    word_scores[word]['sca_mdcs_cosi'] = sc.sca_mdcs(WWC = WWC, word = word, fns = fns, metric = 'cosine')
-                    word_scores[word]['sca_mdcs_eucl'] = sc.sca_mdcs(WWC = WWC, word = word, fns = fns, metric = 'euclidean')
-                    word_scores[word]['sca_mdcs_sqeu'] = sc.sca_mdcs(WWC = WWC, word = word, fns = fns, metric = 'sqeuclidean')
-                    word_scores[word]['sca_mdcs_seuc'] = sc.sca_mdcs(WWC = WWC, word = word, fns = fns, metric = 'seuclidean')
+                    word_scores[word]['sca_mdcs_cosi'] = sc.mdcs(WWC = WWC, word = word, fns = fns, metric = 'cosine', scaled = True)
+                    word_scores[word]['sca_mdcs_eucl'] = sc.mdcs(WWC = WWC, word = word, fns = fns, metric = 'euclidean', scaled = True)
+                    word_scores[word]['sca_mdcs_seuc'] = sc.mdcs(WWC = WWC, word = word, fns = fns, metric = 'seuclidean', scaled = True)
                 # print('##### Calculated scores for %s in  %4.1f' % (word, t.secs))
                 # print(word_scores[word])
 

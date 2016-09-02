@@ -27,6 +27,7 @@ plt.plot(centroid_spread_x, centroid_spread_y, 'go', label='Centroid Gestreut', 
 
 
 plt.axis([0,100,0,100])
+plt.legend(numpoints = 1, loc = 0)
 
 plt.show()
 # x = [2,3,4,5,8,10,15,20,22,24,25,26,28,30,34,36,40,46,52,60]

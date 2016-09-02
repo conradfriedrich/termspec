@@ -19,6 +19,8 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
     filename = 'experiment_context_window'
 
     # results_filename = 'results_' + filename + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + '.csv'
+
+    # Ugly Exception. No time to build it in properly...
     binary = False
     if score_fn is 'binary':
         binary = True
@@ -38,6 +40,7 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
     # Word-Word Co-occurrence Matrix
     WWC = data['WWC']
 
+    # Continuation of the ugly exception
     if binary:
         WWC[np.nonzero(WWC)] = 1
         score_fn = binary
