@@ -1,0 +1,268 @@
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 4, Score Function: binary
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 24.7s
+ger words 4916
+           nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar        True     False      True         False
+Boom       True     False      True         False
+Date       True     False      True         False
+Image      True     False      True         False
+Manager    True     False     False         False
+Marketing  True     False     False         False
+Service    True     False      True         False
+Test       True     False      True         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 4, Score Function: raw_count
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.1s
+ger words 4916
+           nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar        True     False     False         False
+Boom       True     False     False         False
+Date       True     False     False          True
+Image      True      True     False          True
+Manager    True     False     False          True
+Marketing  True      True     False          True
+Service    True     False     False          True
+Test       True     False     False          True
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 4, Score Function: chi_sq
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.3s
+ger words 4916
+           nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar        True      True      True         False
+Boom       True     False      True         False
+Date       True      True     False         False
+Image      True     False     False          True
+Manager    True      True     False         False
+Marketing  True      True      True         False
+Service    True      True     False         False
+Test       True      True      True         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 4, Score Function: dice
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 20.6s
+ger words 4916
+           nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar        True     False      True         False
+Boom       True     False      True         False
+Date       True     False     False         False
+Image      True     False      True         False
+Manager    True      True     False         False
+Marketing  True      True      True         False
+Service    True      True     False         False
+Test       True     False      True         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 25, Score Function: binary
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 20.6s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True     False     False         False
+Boom        True     False     False         False
+Date        True     False     False         False
+Image      False     False      True         False
+Manager     True     False     False         False
+Marketing   True      True     False          True
+Service     True     False     False         False
+Test        True     False     False         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 25, Score Function: raw_count
+##### Retrieved data and Tokenized in 32.3s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 20.5s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True     False     False          True
+Boom        True     False     False         False
+Date        True     False     False          True
+Image      False     False     False          True
+Manager     True     False     False          True
+Marketing   True      True     False          True
+Service     True     False     False          True
+Test        True     False     False          True
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 25, Score Function: chi_sq
+##### Retrieved data and Tokenized in 31.9s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 20.5s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True      True     False         False
+Boom        True      True     False          True
+Date        True      True     False         False
+Image      False     False     False          True
+Manager     True      True     False          True
+Marketing   True      True     False         False
+Service     True      True     False         False
+Test        True      True     False         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 25, Score Function: dice
+##### Retrieved data and Tokenized in 36.7s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 24.4s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True      True     False         False
+Boom        True     False     False         False
+Date        True      True     False         False
+Image      False      True     False         False
+Manager     True      True     False         False
+Marketing   True      True     False         False
+Service     True      True     False         False
+Test        True      True     False         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 60, Score Function: binary
+##### Retrieved data and Tokenized in 36.5s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.7s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True     False     False         False
+Boom        True     False     False         False
+Date        True      True     False          True
+Image      False     False     False         False
+Manager     True      True     False          True
+Marketing   True      True     False          True
+Service     True      True     False          True
+Test        True     False     False         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 60, Score Function: raw_count
+##### Retrieved data and Tokenized in 36.5s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.7s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True     False     False          True
+Boom        True     False     False         False
+Date        True     False     False          True
+Image      False     False     False          True
+Manager     True     False     False          True
+Marketing   True      True     False          True
+Service     True      True     False          True
+Test        True     False     False          True
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 60, Score Function: chi_sq
+##### Retrieved data and Tokenized in 36.1s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.5s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True      True     False          True
+Boom        True      True     False          True
+Date        True      True     False          True
+Image      False     False     False          True
+Manager     True      True     False          True
+Marketing   True      True     False          True
+Service     True      True     False         False
+Test        True      True     False          True
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 60, Score Function: dice
+##### Retrieved data and Tokenized in 37.6s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 22.4s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True      True     False         False
+Boom        True     False     False         False
+Date        True      True     False         False
+Image      False     False     False         False
+Manager     True      True     False         False
+Marketing   True      True     False         False
+Service     True      True     False         False
+Test        True      True     False         False
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 100, Score Function: binary
+##### Retrieved data and Tokenized in 41.2s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.9s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True     False     False         False
+Boom        True     False     False         False
+Date        True      True     False          True
+Image      False     False     False         False
+Manager     True      True     False          True
+Marketing   True      True     False          True
+Service     True      True     False          True
+Test        True      True     False          True
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 100, Score Function: raw_count
+##### Retrieved data and Tokenized in 36.6s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.8s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True     False     False          True
+Boom        True     False     False         False
+Date        True     False     False          True
+Image      False     False     False          True
+Manager     True     False     False          True
+Marketing   True      True     False          True
+Service     True     False     False          True
+Test        True     False     False          True
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 100, Score Function: chi_sq
+##### Retrieved data and Tokenized in 33.7s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 22.0s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True      True     False          True
+Boom        True      True     False          True
+Date        True      True     False          True
+Image      False      True     False          True
+Manager     True      True     False          True
+Marketing   True      True     False          True
+Service     True      True     False         False
+Test        True      True     False          True
+Conducting Experiment with Anglicisms in Context Window...
+Window Size: 100, Score Function: dice
+##### Retrieved data and Tokenized in 35.1s
+eng words 4847
+Reading in Tiger Corpus and writing to file...
+Done.
+##### Retrieved data and Tokenized in 23.9s
+ger words 4916
+            nzds mdcs_cosi mdcs_seuc sca_mdcs_cosi
+Bar         True      True     False         False
+Boom        True     False     False         False
+Date        True      True     False         False
+Image      False     False     False          True
+Manager     True      True     False         False
+Marketing   True      True     False         False
+Service     True      True     False         False
+Test        True      True     False         False
+[Finished in 3831.4s]

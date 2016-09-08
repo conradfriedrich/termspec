@@ -11,7 +11,11 @@ import numpy as np
 from timer import Timer
 
 
-def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice', language = 'english'):
+def conduct(verbose = True,
+    window_size = 4,
+    corpus = 'brown',
+    score_fn = 'dice',
+    language = 'english'):
 
     print('Conducting Experiment with Context Window...')
     print('Language: {}, Corpus: {}, Window Size: {}, Score Function: {}'.format(language, corpus, window_size, score_fn))
@@ -20,11 +24,11 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
 
     # results_filename = 'results_' + filename + '_' + corpus + '_ws' + str(window_size) + '_' + score_fn + '.csv'
 
-    # Ugly Exception. No time to build it in properly...
-    binary = False
-    if score_fn is 'binary':
-        binary = True
-        score_fn = 'raw_count'
+    # # Ugly Exception. No time to build it in properly...
+    # binary = False
+    # if score_fn is 'binary':
+    #     binary = True
+    #     score_fn = 'raw_count'
 
     data = sd.easy_setup_context_window(
         fqt = 10,
@@ -40,10 +44,10 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
     # Word-Word Co-occurrence Matrix
     WWC = data['WWC']
 
-    # Continuation of the ugly exception
-    if binary:
-        WWC[np.nonzero(WWC)] = 1
-        score_fn = binary
+    # # Continuation of the ugly exception
+    # if binary:
+    #     WWC[np.nonzero(WWC)] = 1
+    #     score_fn = binary
 
 
     if language is 'german':
@@ -58,7 +62,6 @@ def conduct(verbose = True, window_size = 4, corpus = 'brown', score_fn = 'dice'
 
     scores = [
         'nzds',
-
         'mdcs_cosi',
         'mdcs_seuc',
 

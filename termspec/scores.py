@@ -39,8 +39,30 @@ def nzds(M, fns, word):
     n_total_dimensions = len(fns)
     n_non_zero_dimensions = len(context_vector.nonzero()[0])
 
-    non_zero_dimensions_measure = n_non_zero_dimensions / n_total_dimensions
-    return non_zero_dimensions_measure
+    return n_non_zero_dimensions / n_total_dimensions
+
+def avnzds (M, fns, word):
+    """Computes the Average Context Non Zero Dimensions Score for @word.
+
+    Computes the Nzd Score for every word in the context. Then returns the average.
+    """
+    context_vector = M[fns.index(word)]
+
+    indices = np.flatnonzero(context_vector)
+    indices = indices[indices != 2]
+
+    M = M[indices]
+
+    n_total_dimensions = len(fns)
+
+    def ndzs_per_row( cv ):
+        n_non_zero_dimensions = len(cv.nonzero()[0])
+        return n_non_zero_dimensions / n_total_dimensions
+
+    nzdss = np.apply_along_axis( ndzs_per_row, axis=1, arr=M )
+    return  nzdss.mean()
+
+
 
 def tacds(WWC, fns, word, metric = 'cosine'):
     """Computes the Total Average Context Distance Score for @word.

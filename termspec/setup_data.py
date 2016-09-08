@@ -11,10 +11,9 @@ from nltk import word_tokenize, sent_tokenize, collocations
 
 from scipy import sparse
 
-def easy_setup_sentence_context(fqt = 10, filename = None, score_fn = 'raw_count', corpus = 'toy', deserialize = True, serialize = True):
+def easy_setup_sentence_context(fqt = 10, score_fn = 'raw_count', corpus = 'toy', deserialize = True, serialize = True):
     """Sets up data object for experiments with the WORD CONTEXT = SENTENCES
 
-    If a filename is given, tries to deserialize from that file.
     Creates documents from the given corpus,
     a Document Word Frequency Matrix,
     a Word Word Cooccurrence Matrix,
@@ -25,11 +24,10 @@ def easy_setup_sentence_context(fqt = 10, filename = None, score_fn = 'raw_count
 
     data = None
 
-    f_prx = filename
     f_sfx = 'tmp'
-    DWF_filename = '{}_{}_{}_DWF.{}'.format(f_prx, corpus, score_fn, f_sfx)
-    WWC_filename = '{}_{}_{}_WWC.{}'.format(f_prx, corpus, score_fn, f_sfx)
-    fns_filename = '{}_{}_{}_fns.{}'.format(f_prx, corpus, score_fn, f_sfx)
+    DWF_filename = '{}_{}_DWF.{}'.format(corpus, score_fn, f_sfx)
+    WWC_filename = '{}_{}_WWC.{}'.format(corpus, score_fn, f_sfx)
+    fns_filename = '{}_{}_fns.{}'.format(corpus, score_fn, f_sfx)
 
     if deserialize:
         data = {}
@@ -108,23 +106,24 @@ def easy_setup_context_window(
     fqt = 10,
     window_size = 4,
     score_fn = 'dice',
-    filename = None,
     corpus = 'toy',
     deserialize = True,
     serialize = True):
 
     """Sets up data object for experiments with the WORD CONTEXT = CONTEXT WINDOW
     """
-
+    epsilon = 0.00000000001
     def raw_count(*marginals):
         """Scores ngrams by their frequency"""
         return marginals[0]
 
+    def binary (*marginals):
+        return 1 if marginals[0] > epsilon else 0
+
     words = WWC = None
-    f_prx = filename
     f_sfx = 'tmp'
-    words_filename = '{}_{}_ws{}_fqt{}_{}_words.{}'.format(f_prx, corpus, window_size, fqt, score_fn, f_sfx)
-    WWC_filename = '{}_{}_ws{}_fqt{}_{}_WWC.{}'.format(f_prx, corpus, window_size, fqt, score_fn, f_sfx)
+    words_filename = '{}_ws{}_fqt{}_{}_words.{}'.format(corpus, window_size, fqt, score_fn, f_sfx)
+    WWC_filename = '{}_ws{}_fqt{}_{}_WWC.{}'.format(corpus, window_size, fqt, score_fn, f_sfx)
 
     if deserialize:
 
@@ -160,6 +159,8 @@ def easy_setup_context_window(
             scored = finder.score_ngrams( bgm.raw_freq )
         elif score_fn == 'raw_count':
             scored = finder.score_ngrams( raw_count )
+        elif score_fn == 'binary':
+            scored = finder.score_ngrams( binary )
         else:
             raise ValueError('Passed Score Function not implemented', score_fn)
 
@@ -235,12 +236,21 @@ def retrieve_data_and_tokenize_tokens(corpus = 'toy'):
         tokens2 = util.normalize(tokens2)
         tokens.extend(tokens2)
     elif corpus == 'tiger':
-        root = '/Users/conrad/Documents/uni/2016SS/SpinfoHausarbeit/py/termspec/corpus'
-        fileid = 'tiger_aug07.conll09'
-        columntypes = ['ignore', 'words', 'ignore', 'ignore', 'pos']
-        tiger = ConllCorpusReader(root, fileid, columntypes, encoding='utf8')
-        tokens = tiger.words()
-        tokens = util.normalize(tokens, language = 'german')
+
+        tokens = util.read_from_file(filename)
+        if not tokens:
+            print('Reading in Tiger Corpus and writing to file...')
+            root = '/Users/conrad/Documents/uni/2016SS/SpinfoHausarbeit/py/termspec/corpus'
+            fileid = 'tiger_aug07.conll09'
+            columntypes = ['ignore', 'words', 'ignore', 'ignore', 'pos']
+            tiger = ConllCorpusReader(root, fileid, columntypes, encoding='utf8')
+            tokens = tiger.words()
+            tokens = util.normalize(tokens, language = 'german')
+            util.write_to_file(filename, tokens)
+            print('Done.')
+        else:
+            print('Read Tiger Corpus from file')
+
     else:
         raise ValueError('Corpus passed is not implemented.', corpus)
 

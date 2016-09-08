@@ -27,14 +27,15 @@ def normalize(words, language = 'english'):
 
     #lowercase all terms
     words = [w.lower() for w in words]
+    #remove stopwords
+    words = [w for w in words if not w in stopwords]
     # stem (snowball)
     words = [stemmer.stem(w) for w in words]
     # remove all numerical terms
     words = [w for w in words if not w.isnumeric()]
     # remove pure punctuations
     words = [w for w in words if not ispunctuation(w)]
-    #remove stopwords
-    words = [w for w in words if not w in stopwords]
+
     #remove short words
     words = [w for w in words if not len(w) < 3]
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+"""Script to run the experiment for specificity in german with different parameters"""
 
 import experiment_context_window as ecw
-import experiment_sentence_context as esc
 import json
 
 corpus = 'tiger'
