@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+"""Script to run the experiment for anglicisms with different parameters"""
+
+
 import experiment_context_window_comparative as ecwc
 
 score_fns = ['binary', 'raw_count', 'chi_sq', 'dice']
